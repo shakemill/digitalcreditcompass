@@ -130,7 +130,14 @@ export async function POST(req: NextRequest) {
           });
           if (user) {
             const endForEmail = getEndForEmail(periodStart, periodEnd, interval);
-            await sendProWelcomeEmail(user.email, user.name, periodStart, endForEmail);
+            const result = await sendProWelcomeEmail(user.email, user.name, periodStart, endForEmail);
+            if (result.ok) {
+              console.info("[webhook] PRO welcome email sent to", user.email);
+            } else if (result.reason === "smtp_not_configured") {
+              console.warn("[webhook] PRO welcome email skipped: SMTP not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS)");
+            } else {
+              console.error("[webhook] PRO welcome email send failed:", result.error);
+            }
           }
         } catch (err) {
           console.error("[webhook] Failed to send PRO welcome email:", err);
@@ -185,7 +192,14 @@ export async function POST(req: NextRequest) {
           });
           if (user) {
             const endForEmail = getEndForEmail(periodStart, periodEnd, interval);
-            await sendProWelcomeEmail(user.email, user.name, periodStart, endForEmail);
+            const result = await sendProWelcomeEmail(user.email, user.name, periodStart, endForEmail);
+            if (result.ok) {
+              console.info("[webhook] PRO welcome email sent to", user.email);
+            } else if (result.reason === "smtp_not_configured") {
+              console.warn("[webhook] PRO welcome email skipped: SMTP not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS)");
+            } else {
+              console.error("[webhook] PRO welcome email send failed:", result.error);
+            }
           }
         } catch (err) {
           console.error("[webhook] Failed to send PRO welcome email:", err);

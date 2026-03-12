@@ -108,16 +108,19 @@ export async function sendWelcomeEmail(
   });
 }
 
+/** Result of attempting to send PRO welcome email (for logging). */
+export type SendProWelcomeResult = { ok: true } | { ok: false; reason: "smtp_not_configured" | "send_failed"; error?: unknown };
+
 export async function sendProWelcomeEmail(
   email: string,
   name: string,
   periodStart: Date,
   periodEnd: Date
-): Promise<void> {
+): Promise<SendProWelcomeResult> {
   const transport = getTransport();
   if (!transport) {
-    console.warn("[email] SMTP not configured; skipping PRO welcome email to", email);
-    return;
+    console.warn("[email] SMTP not configured; skipping PRO welcome email to", email, "- set SMTP_HOST, SMTP_USER, SMTP_PASS in production");
+    return { ok: false, reason: "smtp_not_configured" };
   }
 
   const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -136,13 +139,19 @@ export async function sendProWelcomeEmail(
   `;
   const text = `Welcome to PRO\nYour subscription is active\n\nHi ${name},\n\nThank you for upgrading to Digital Credit Compass PRO. You now have full access to unlimited scenarios, the full Yield Board, PDF export, and more.\n\nSubscription start: ${startStr}\nSubscription end: ${endStr}\n\n— Digital Credit Compass — Clarity Before Capital`;
 
-  await transport.sendMail({
-    from: getFrom(),
-    to: email,
-    subject: "Welcome to DCC PRO",
-    html,
-    text,
-  });
+  try {
+    await transport.sendMail({
+      from: getFrom(),
+      to: email,
+      subject: "Welcome to DCC PRO",
+      html,
+      text,
+    });
+    return { ok: true };
+  } catch (err) {
+    console.error("[email] PRO welcome sendMail failed to", email, err);
+    return { ok: false, reason: "send_failed", error: err };
+  }
 }
 
 export async function sendSubscriptionExpiryReminder(

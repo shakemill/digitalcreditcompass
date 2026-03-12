@@ -17,6 +17,7 @@ function LoginForm() {
     if (searchParams.get("verified") === "1") setVerified(true);
     const err = searchParams.get("error");
     if (err === "invalid_or_expired") setError("Verification link invalid or expired.");
+    else if (err === "link_expired") setError("This verification link has expired. Please register again or request a new link.");
     else if (err === "missing_token") setError("Missing verification token.");
   }, [searchParams]);
 
