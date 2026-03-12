@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
 import { sendWelcomeEmail } from "@/lib/email/sendEmail";
+import { getBaseUrlFromRequest } from "@/lib/utils";
 
 export async function GET(req: NextRequest) {
+  const baseUrl = getBaseUrlFromRequest(req);
   const token = req.nextUrl.searchParams.get("token");
   if (!token) {
-    return NextResponse.redirect(new URL("/auth/login?error=missing_token", req.url));
+    return NextResponse.redirect(`${baseUrl}/auth/login?error=missing_token`);
   }
 
   const user = await db.user.findFirst({
@@ -16,7 +18,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (!user) {
-    return NextResponse.redirect(new URL("/auth/login?error=invalid_or_expired", req.url));
+    return NextResponse.redirect(`${baseUrl}/auth/login?error=invalid_or_expired`);
   }
 
   await db.user.update({
@@ -28,10 +30,6 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "").trim() ||
-    new URL(req.url).origin;
   const signInUrl = `${baseUrl}/auth/login`;
   try {
     await sendWelcomeEmail(user.email, user.name, signInUrl);
