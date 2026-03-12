@@ -3,8 +3,9 @@ import { getSessionFromCookie, setSessionCookie } from "@/lib/auth/session";
 import { getBaseUrlFromRequest } from "@/lib/utils";
 import { db } from "@/lib/prisma";
 
-const POLL_ATTEMPTS = 5;
-const POLL_DELAY_MS = 1000;
+// Wait for webhook to upgrade user to PRO (can take a few seconds in production)
+const POLL_ATTEMPTS = 15;
+const POLL_DELAY_MS = 1500;
 
 export async function GET(req: NextRequest) {
   const baseUrl = getBaseUrlFromRequest(req);
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
   const redirectTo = req.nextUrl.searchParams.get("redirect") || "/dashboard/pro";
   const safeRedirect = redirectTo.startsWith("/") ? redirectTo : "/dashboard/pro";
 
-  // After Stripe checkout, webhook may still be processing: poll for PRO role briefly
+  // After Stripe checkout, webhook may still be processing: poll for PRO role
   if (safeRedirect.includes("/dashboard/pro")) {
     for (let i = 0; i < POLL_ATTEMPTS; i++) {
       const user = await db.user.findUnique({
@@ -39,6 +40,20 @@ export async function GET(req: NextRequest) {
         await new Promise((r) => setTimeout(r, POLL_DELAY_MS));
       }
     }
+    // Still not PRO after polling: send to dashboard with hint (webhook may be delayed or misconfigured)
+    const userAfterPoll = await db.user.findUnique({
+      where: { id: session.sub },
+      select: { id: true, email: true, name: true, role: true },
+    });
+    if (userAfterPoll) {
+      await setSessionCookie({
+        sub: userAfterPoll.id,
+        email: userAfterPoll.email,
+        name: userAfterPoll.name,
+        role: userAfterPoll.role,
+      });
+    }
+    return NextResponse.redirect(`${baseUrl}/dashboard?payment=pending`);
   }
 
   const user = await db.user.findUnique({

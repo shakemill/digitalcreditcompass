@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Coins, Banknote, CircleDollarSign, Layers, BarChart3, Lock, ArrowRight } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Coins, Banknote, CircleDollarSign, Layers, BarChart3, Lock, ArrowRight, RefreshCw } from "lucide-react";
 
 type User = { id: string; email: string; name: string; role: string };
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const paymentPending = searchParams.get("payment") === "pending";
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -42,6 +44,22 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {paymentPending && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
+          <p className="font-medium">Payment received — PRO access is being activated</p>
+          <p className="mt-1 text-sm">
+            This usually takes a few seconds. If your account is not updated, the webhook may not be configured for this environment. Try refreshing the page, or contact support if it persists.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.replace("/dashboard/pro")}
+            className="mt-3 inline-flex items-center gap-2 rounded-lg bg-amber-600 px-3 py-2 text-sm font-medium text-white hover:bg-amber-700"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Check PRO access
+          </button>
+        </div>
+      )}
       <div>
         <h2 className="font-heading text-2xl font-semibold text-text-primary">
           Welcome, {user.name}

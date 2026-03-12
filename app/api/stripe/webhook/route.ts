@@ -44,6 +44,14 @@ function getEndForEmail(
   return d;
 }
 
+/** GET: allow health check / browser visit — returns 200 so the URL doesn't show "page doesn't work". */
+export async function GET() {
+  return NextResponse.json(
+    { message: "Stripe webhook endpoint — Stripe sends POST requests here; opening in a browser is normal." },
+    { status: 200 }
+  );
+}
+
 export async function POST(req: NextRequest) {
   if (!stripe || !webhookSecret) {
     return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
