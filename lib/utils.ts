@@ -3,8 +3,13 @@ import type { NextRequest } from "next/server";
 /**
  * Base URL for redirects and emails. Prefers env, then proxy headers (X-Forwarded-*), then request URL.
  * Use in API routes when redirecting so production behind a proxy does not redirect to localhost.
+ * APP_URL is read at runtime (server-only); set it in production to avoid NEXT_PUBLIC_* build-time value.
  */
 export function getBaseUrlFromRequest(req: NextRequest): string {
+  // Server-side env read at runtime (not inlined at build) — set APP_URL in production
+  const appUrl = process.env.APP_URL?.trim();
+  if (appUrl) return appUrl;
+
   const fromEnv =
     process.env.NEXT_PUBLIC_APP_URL?.trim() ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "").trim();

@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromCookie, setSessionCookie } from "@/lib/auth/session";
+import { getBaseUrlFromRequest } from "@/lib/utils";
 import { db } from "@/lib/prisma";
 
 const POLL_ATTEMPTS = 5;
 const POLL_DELAY_MS = 1000;
 
 export async function GET(req: NextRequest) {
+  const baseUrl = getBaseUrlFromRequest(req);
+
   const session = await getSessionFromCookie();
   if (!session) {
-    return NextResponse.redirect(new URL("/auth/login", req.url));
+    const redirectTo = req.nextUrl.searchParams.get("redirect") || "/dashboard/pro";
+    const fromPath = redirectTo.startsWith("/") ? redirectTo : "/dashboard/pro";
+    return NextResponse.redirect(`${baseUrl}/auth/login?from=${encodeURIComponent(fromPath)}`);
   }
 
   const redirectTo = req.nextUrl.searchParams.get("redirect") || "/dashboard/pro";
@@ -28,7 +33,7 @@ export async function GET(req: NextRequest) {
           name: user.name,
           role: user.role,
         });
-        return NextResponse.redirect(new URL(safeRedirect, req.url));
+        return NextResponse.redirect(`${baseUrl}${safeRedirect}`);
       }
       if (i < POLL_ATTEMPTS - 1) {
         await new Promise((r) => setTimeout(r, POLL_DELAY_MS));
@@ -41,7 +46,7 @@ export async function GET(req: NextRequest) {
     select: { id: true, email: true, name: true, role: true },
   });
   if (!user) {
-    return NextResponse.redirect(new URL("/auth/login", req.url));
+    return NextResponse.redirect(`${baseUrl}/auth/login?from=${encodeURIComponent(safeRedirect)}`);
   }
 
   await setSessionCookie({
@@ -51,5 +56,5 @@ export async function GET(req: NextRequest) {
     role: user.role,
   });
 
-  return NextResponse.redirect(new URL(safeRedirect, req.url));
+  return NextResponse.redirect(`${baseUrl}${safeRedirect}`);
 }
