@@ -1,26 +1,134 @@
 @import "tailwindcss";
 
+/* Global CSS variables (mockup) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary: #F29C22;
+  --primary-dim: rgba(242, 156, 34, 0.09);
+  --primary-glow: rgba(242, 156, 34, 0.22);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* DCC palette – Tailwind v4 @theme (used for utilities) */
+@theme {
+  /* primary */
+  --color-primary: #F29C22;
+  --color-primary-50: #FEF6E8;
+  --color-primary-100: #FDECD1;
+  --color-primary-200: #FBD9A3;
+  --color-primary-300: #F8C675;
+  --color-primary-400: #F6B347;
+  --color-primary-500: #F29C22;
+  --color-primary-600: #D4841A;
+  --color-primary-700: #A86913;
+  --color-primary-800: #7C4E0E;
+  --color-primary-900: #503208;
+  /* surface */
+  --color-surface-base: #F5F4F0;
+  --color-surface-card: #FFFFFF;
+  --color-surface-elevated: #F0EDE8;
+  --color-surface-hover: #E8E4DE;
+  /* border */
+  --color-border: #E0DBD3;
+  --color-border-strong: #C8C2B8;
+  /* text */
+  --color-text-primary: #1A1714;
+  --color-text-secondary: #5C564E;
+  --color-text-muted: #9C9488;
+  /* risk */
+  --color-risk-low: #059669;
+  --color-risk-low-bg: rgba(5, 150, 105, 0.08);
+  --color-risk-mid: #D97706;
+  --color-risk-mid-bg: rgba(217, 119, 6, 0.08);
+  --color-risk-elev: #EA580C;
+  --color-risk-elev-bg: rgba(234, 88, 12, 0.08);
+  --color-risk-high: #DC2626;
+  --color-risk-high-bg: rgba(220, 38, 38, 0.08);
+  /* module */
+  --color-module-btc: #F29C22;
+  --color-module-btc-bg: rgba(242, 156, 34, 0.09);
+  --color-module-fiat: #4F46E5;
+  --color-module-fiat-bg: rgba(79, 70, 229, 0.08);
+  --color-module-stbl: #0891B2;
+  --color-module-stbl-bg: rgba(8, 145, 178, 0.08);
+  --color-module-port: #7C3AED;
+  --color-module-port-bg: rgba(124, 58, 237, 0.08);
+  /* fonts: Lato (body), Syne (headings), DM Mono (labels/code) */
+  --font-sans: var(--font-sans-app), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-heading-app), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-app), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-surface-base text-text-primary font-sans antialiased;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+  }
+  /* Headings use Syne with tighter tracking */
+  h1, h2, h3, .font-heading {
+    letter-spacing: -0.02em;
+  }
+  /* Focus ring for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+  /* Pointer cursor on interactive elements */
+  a,
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"],
+  [role="tab"],
+  [role="tab"] > *,
+  label[for] {
+    cursor: pointer;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.3s ease forwards;
+}
+
+.animate-fade-up:nth-child(1) { animation-delay: 0ms; }
+.animate-fade-up:nth-child(2) { animation-delay: 50ms; }
+.animate-fade-up:nth-child(3) { animation-delay: 100ms; }
+.animate-fade-up:nth-child(4) { animation-delay: 150ms; }
+.animate-fade-up:nth-child(5) { animation-delay: 200ms; }
+.animate-fade-up:nth-child(6) { animation-delay: 250ms; }
+
+/* Score bar / SRI bar transitions */
+.transition-score-bar {
+  transition: width 0.5s ease;
+}
+.transition-sri-bar {
+  transition: width 0.4s ease;
+}
+
+/* Slider thumb – primary (BTC planner) */
+input[type="range"].accent-primary {
+  accent-color: var(--primary);
+}
+input[type="range"].accent-primary::-webkit-slider-thumb {
+  background: var(--primary);
+}
+input[type="range"].accent-primary::-moz-range-thumb {
+  background: var(--primary);
 }

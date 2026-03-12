@@ -1,0 +1,20 @@
+export type SuitabilitySnapshot = {
+  id: string;
+  dccVersion: string;
+  plannerModule: string;
+  generatedAt: Date;
+  dataAsOf: Date;
+  inputs: unknown;
+  allocation: unknown[];
+  outputs: unknown;
+  riskNotes: unknown[];
+  disclaimers: unknown[];
+  provenance: unknown;
+  clientName?: string | null;
+  riskPreference?: string | null;
+  advisorPlatform?: string | null;
+  advisorPushStatus?: string | null;
+  advisorPlatformRef?: string | null;
+  pdfPath?: string | null;
+  createdAt: Date;
+};

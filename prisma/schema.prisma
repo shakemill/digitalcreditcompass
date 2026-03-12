@@ -1,0 +1,259 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── PROVIDERS ──────────────────────────────────────────────
+model Provider {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  plannerType     PlannerType
+  domicile        String
+  jurisdictionTier JurisdictionTier
+  isActive        Boolean  @default(false)
+  apyMin          Float?
+  apyMax          Float?
+  maxLtv          Float?
+  liquidationLtv  Float?
+  rehypothecation ReyhypType @default(UNDISCLOSED)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  scoringInputs   ScoringInput[]
+  scoreSnapshots  ScoreSnapshot[]
+  evidencePacks   EvidencePack[]
+
+  @@index([plannerType, isActive])
+}
+
+enum PlannerType {
+  BTC
+  FIAT
+  STABLECOIN
+}
+
+enum JurisdictionTier {
+  T1
+  T2
+  T3
+  UNKNOWN
+}
+
+enum ReyhypType {
+  NO
+  DISCLOSED
+  UNDISCLOSED
+}
+
+// ── SCORING INPUTS ─────────────────────────────────────────
+model ScoringInput {
+  id               String   @id @default(cuid())
+  providerId       String
+  provider         Provider @relation(fields: [providerId], references: [id])
+  scoreSnapshots   ScoreSnapshot[]
+  evidencePackRef  String?
+  // BTC criteria (0-100 each)
+  transparency          Float?
+  collateralControl     Float?
+  jurisdiction          Float?
+  structuralRisk        Float?
+  trackRecord           Float?
+  // FIAT criteria
+  marketVolatility      Float?
+  incomeMechanism       Float?
+  seniority             Float?
+  complexity            Float?
+  providerQuality       Float?
+  // STABLECOIN criteria
+  reserveQuality        Float?
+  yieldTransparency     Float?
+  counterpartyRisk      Float?
+  liquidity             Float?
+  // Market data (bypass admin — direct to engine)
+  hv30                  Float?
+  pegDeviation90d       Float?
+  tvl                   Float?
+  maxDrawdown90d        Float?
+  marketDataFetchedAt   DateTime?
+  // Admin approval
+  adminApprovedBy  String?
+  adminApprovedAt  DateTime?
+  allFieldsApproved Boolean @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([providerId])
+}
+
+// ── SCORE SNAPSHOTS — APPEND ONLY ─────────────────────────
+// ⚠ NEVER update or delete rows in this table
+model ScoreSnapshot {
+  id                String   @id @default(cuid())
+  providerId        String
+  provider          Provider @relation(fields: [providerId], references: [id])
+  scoringInputId    String
+  scoringInput      ScoringInput @relation(fields: [scoringInputId], references: [id])
+  rawScore          Float
+  durationMultiplier Float
+  finalScore        Float
+  riskBand          RiskBand
+  scoreVersion      String   @default("1.0")
+  plannerType       PlannerType
+  criteriaBreakdown Json     // { criterion: score } snapshot
+  createdAt         DateTime @default(now())
+
+  @@index([providerId, createdAt])
+}
+
+enum RiskBand {
+  LOW
+  MEDIUM
+  ELEVATED
+  HIGH
+}
+
+// ── EVIDENCE PACKS ─────────────────────────────────────────
+model EvidencePack {
+  id               String   @id @default(cuid())
+  providerId       String
+  provider         Provider @relation(fields: [providerId], references: [id])
+  agentRunAt       DateTime @default(now())
+  proposedClassifications Json  // AgentOutput structure
+  marketData       Json?
+  overallConfidence Float
+  publishBlocked   Boolean  @default(true)  // ALWAYS true until admin approves
+  fieldsRequiringReview   Json  @default("[]")
+  criticalFieldsBelowThreshold Json @default("[]")
+  adminStatus      EvidenceStatus @default(PENDING)
+  reviewedBy       String?
+  reviewedAt       DateTime?
+  createdAt        DateTime @default(now())
+
+  @@index([providerId, adminStatus])
+}
+
+enum EvidenceStatus {
+  PENDING
+  PARTIAL
+  APPROVED
+  REJECTED
+}
+
+// ── SUITABILITY SNAPSHOTS ──────────────────────────────────
+model SuitabilitySnapshot {
+  id              String   @id @default(uuid())  // UUID v4
+  userId          String?  // owner; null = legacy
+  dccVersion      String   @default("1.0")
+  plannerModule   String   // "1A" | "1B" | "1C" | "1A+1B+1C"
+  generatedAt     DateTime @default(now())
+  dataAsOf        DateTime
+  // User inputs (JSON)
+  inputs          Json
+  // Allocation (JSON array)
+  allocation      Json
+  // Portfolio outputs (JSON)
+  outputs         Json
+  // Risk notes & disclaimers
+  riskNotes       Json     @default("[]")
+  disclaimers     Json     @default("[]")
+  // Provenance
+  provenance      Json
+  // Optional client info
+  clientName      String?
+  riskPreference  String?
+  // Advisor push
+  advisorPlatform String?
+  advisorPushStatus String?
+  advisorPlatformRef String?
+  // PDF
+  pdfPath         String?
+  createdAt       DateTime @default(now())
+
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+// ── MARKET DATA CACHE ──────────────────────────────────────
+model MarketDataCache {
+  id          String   @id @default(cuid())
+  providerId  String   @unique
+  hv30        Float?
+  pegDeviation Float?
+  tvl         Float?
+  maxDrawdown90d Float?
+  source      String?
+  fetchedAt   DateTime @default(now())
+  isStale     Boolean  @default(false)  // auto-set if > 7 days
+
+  @@index([providerId])
+}
+
+// ── AUTH: USERS & PLANS ─────────────────────────────────────
+enum UserRole {
+  FREE
+  PRO
+  SUPER_ADMIN
+}
+
+model User {
+  id                        String    @id @default(cuid())
+  email                     String    @unique
+  name                      String
+  passwordHash              String
+  role                      UserRole  @default(FREE)
+  emailVerified             Boolean   @default(false)
+  emailVerificationToken    String?
+  emailVerificationExpiresAt DateTime?
+  passwordResetToken        String?
+  passwordResetExpiresAt    DateTime?
+  subscriptionPeriodStart   DateTime?
+  subscriptionPeriodEnd     DateTime?
+  billingInterval           String?   // "month" | "year", set by Stripe webhook
+  subscriptionReminder7dForEnd  DateTime?
+  subscriptionReminder1dForEnd  DateTime?
+  subscriptionReminder30dForEnd DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  subscriptions             Subscription[]
+  suitabilitySnapshots      SuitabilitySnapshot[]
+}
+
+model Plan {
+  id                 String   @id @default(cuid())
+  slug               String   @unique  // "free" | "pro"
+  name               String
+  priceYearCents     Int      @default(0)
+  priceMonthCents    Int      @default(0)
+  stripePriceIdYear  String?
+  stripePriceIdMonth String?
+
+  subscriptions     Subscription[]
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId               String
+  plan                 Plan     @relation(fields: [planId], references: [id])
+  stripeSubscriptionId String?
+  status               String   @default("active")  // active, canceled, past_due, etc.
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([userId])
+  @@index([userId])
+}
+
+// ── SITE SETTINGS ───────────────────────────────────────────
+model SiteSetting {
+  key   String @id
+  value String
+}
