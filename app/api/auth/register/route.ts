@@ -47,7 +47,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "").trim() ||
+      "http://localhost:3000";
     await sendVerificationEmail(email, name, `${baseUrl}/api/auth/verify-email?token=${token}`);
 
     return NextResponse.json({

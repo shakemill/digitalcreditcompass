@@ -28,7 +28,10 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "").trim() ||
+    new URL(req.url).origin;
   const signInUrl = `${baseUrl}/auth/login`;
   try {
     await sendWelcomeEmail(user.email, user.name, signInUrl);
@@ -36,5 +39,5 @@ export async function GET(req: NextRequest) {
     console.error("[verify-email] Failed to send welcome email:", err);
   }
 
-  return NextResponse.redirect(new URL("/auth/login?verified=1", req.url));
+  return NextResponse.redirect(`${baseUrl}/auth/login?verified=1`);
 }
