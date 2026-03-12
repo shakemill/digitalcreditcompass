@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getSessionFromCookie } from "@/lib/auth/session";
-import { db } from "@/lib/prisma";
+import { getBaseUrlFromRequest } from "@/lib/utils";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "priceId required" }, { status: 400 });
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const baseUrl = getBaseUrlFromRequest(req);
 
   try {
     const checkoutSession = await stripe.checkout.sessions.create({
