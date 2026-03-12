@@ -80,11 +80,22 @@ export async function POST(req: NextRequest) {
         typeof subscriptionRaw === "string"
           ? subscriptionRaw
           : (subscriptionRaw as Stripe.Subscription | null)?.id ?? null;
-      if (!userId || !subscriptionId) break;
+      if (!userId || !subscriptionId) {
+        console.warn("[webhook] checkout.session.completed skipped: missing userId or subscriptionId", {
+          userId: userId ?? null,
+          subscriptionId: subscriptionId ?? null,
+          client_reference_id: session.client_reference_id ?? null,
+          metadata: session.metadata ?? null,
+        });
+        break;
+      }
 
       try {
         const plan = await db.plan.findUnique({ where: { slug: "pro" } });
-        if (!plan) break;
+        if (!plan) {
+          console.warn("[webhook] checkout.session.completed skipped: Plan 'pro' not found in database");
+          break;
+        }
 
         let periodStart = new Date();
         let periodEnd: Date | null = null;
@@ -115,6 +126,7 @@ export async function POST(req: NextRequest) {
             billingInterval: interval ?? undefined,
           },
         });
+        console.info("[webhook] checkout.session.completed: user updated to PRO", { userId, subscriptionId });
         await db.subscription.upsert({
           where: { userId },
           create: {
@@ -160,7 +172,10 @@ export async function POST(req: NextRequest) {
     case "customer.subscription.updated": {
       const sub = event.data.object as Stripe.Subscription;
       const userId = sub.metadata?.userId ?? (sub as Stripe.Subscription & { client_reference_id?: string }).client_reference_id;
-      if (!userId) break;
+      if (!userId) {
+        console.warn("[webhook] customer.subscription.created/updated skipped: missing userId in metadata", { subscriptionId: sub.id });
+        break;
+      }
 
       try {
         const plan = await db.plan.findUnique({ where: { slug: "pro" } });
