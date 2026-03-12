@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Coins, Banknote, CircleDollarSign, Layers, BarChart3, Lock, ArrowRight, RefreshCw } from "lucide-react";
 
 type User = { id: string; email: string; name: string; role: string };
 
-export default function DashboardPage() {
+function DashboardContent() {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -127,5 +127,13 @@ export default function DashboardPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[200px] items-center justify-center"><p className="text-text-secondary">Loading…</p></div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }
