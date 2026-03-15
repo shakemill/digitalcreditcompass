@@ -177,7 +177,7 @@ export function LandingHeader() {
               <Download className="h-4 w-4 shrink-0" aria-hidden />
               Risk methodology
             </Link>
-            {user && (
+            {user ? (
               <div className="flex flex-col gap-2 border-t border-border pt-3">
                 <p className="truncate px-3 text-sm font-medium text-text-primary" title={user.email}>
                   {user.name?.trim() || user.email}
@@ -188,6 +188,25 @@ export function LandingHeader() {
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
                 >
                   Dashboard
+                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                </Link>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 border-t border-border pt-3">
+                <Link
+                  href="/auth/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-hover"
+                >
+                  <LogIn className="h-4 w-4 shrink-0" aria-hidden />
+                  Sign in
+                </Link>
+                <Link
+                  href="/auth/register"
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  Get Started
                   <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                 </Link>
               </div>
