@@ -79,7 +79,14 @@ export async function getSessionFromCookie(): Promise<SessionPayload | null> {
 
 export async function deleteSessionCookie(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  // Use same path, secure, sameSite as setSessionCookie so the browser clears the cookie in production
+  cookieStore.set(COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
 }
 
 export function getSessionTokenFromRequest(cookieHeader: string | null): SessionPayload | null {

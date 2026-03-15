@@ -154,15 +154,23 @@ export function Topbar() {
 
   async function handleAdminLogout() {
     setAdminDropdownOpen(false);
-    await fetch("/api/admin/session", { method: "DELETE" });
-    router.push("/admin/login");
-    router.refresh();
+    try {
+      await fetch("/api/admin/session", { method: "DELETE", credentials: "include" });
+    } finally {
+      window.location.href = "/admin/login";
+    }
   }
 
   async function handleUserLogout() {
     setUserDropdownOpen(false);
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/";
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      window.location.href = "/";
+    }
   }
 
   return (

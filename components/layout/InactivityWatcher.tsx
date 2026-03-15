@@ -32,8 +32,11 @@ function useThrottledActivity(onActivity: () => void) {
 }
 
 async function doLogout() {
-  await fetch("/api/auth/logout", { method: "POST" });
-  window.location.href = "/";
+  try {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  } finally {
+    window.location.href = "/";
+  }
 }
 
 export function InactivityWatcher() {
