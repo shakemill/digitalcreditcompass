@@ -164,12 +164,13 @@ async function main() {
   // ─── STABLECOIN Providers: DeFi (3) + CeFi (2) ─────────────────────
   const stblProviders = [
     // DeFi (on-chain)
-    { name: "Morpho USDC", slug: "morpho-usdc", score: 79, apyMin: 0.07, apyMax: 0.09 },
-    { name: "Aave USDC", slug: "aave-usdc", score: 76, apyMin: 0.06, apyMax: 0.08 },
-    { name: "Compound v3", slug: "compound-v3", score: 68, apyMin: 0.05, apyMax: 0.07 },
+    { name: "Morpho USDC", slug: "morpho-usdc", score: 79, apyMin: 0.07, apyMax: 0.09, providerCategory: "DEFI" as const, stablecoinTypes: ["USDC"], pegType: "Fiat-backed" },
+    { name: "Aave USDC", slug: "aave-usdc", score: 76, apyMin: 0.06, apyMax: 0.08, providerCategory: "DEFI" as const, stablecoinTypes: ["USDC", "USDT"], pegType: "Fiat / Crypto" },
+    { name: "Compound v3", slug: "compound-v3", score: 68, apyMin: 0.05, apyMax: 0.07, providerCategory: "DEFI" as const, stablecoinTypes: ["USDC"], pegType: "Fiat-backed" },
     // CeFi (custodial)
-    { name: "Ledn USDC", slug: "ledn-usdc", score: 72, apyMin: 0.05, apyMax: 0.07 },
-    { name: "Nexo USDC", slug: "nexo-usdc", score: 70, apyMin: 0.04, apyMax: 0.06 },
+    { name: "Ledn USDC", slug: "ledn-usdc", score: 72, apyMin: 0.05, apyMax: 0.07, providerCategory: "CEFI" as const, stablecoinTypes: ["USDC"], pegType: "Fiat-backed" },
+    { name: "Nexo USDC", slug: "nexo-usdc", score: 70, apyMin: 0.04, apyMax: 0.06, providerCategory: "CEFI" as const, stablecoinTypes: ["USDC", "USDT"], pegType: "Fiat / Crypto" },
+    { name: "Matrixport", slug: "matrixport-stablecoin", score: 72, apyMin: 0.04, apyMax: 0.08, providerCategory: "CEFI" as const, stablecoinTypes: ["USDC", "USDT"], pegType: "Fiat-backed" },
   ];
 
   for (const s of stblProviders) {
@@ -185,8 +186,17 @@ async function main() {
         apyMin: s.apyMin,
         apyMax: s.apyMax,
         rehypothecation: "NO",
+        providerCategory: s.providerCategory,
+        stablecoinTypes: s.stablecoinTypes,
+        pegType: s.pegType,
       },
-      update: {},
+      update: {
+        apyMin: s.apyMin,
+        apyMax: s.apyMax,
+        providerCategory: s.providerCategory,
+        stablecoinTypes: s.stablecoinTypes,
+        pegType: s.pegType,
+      },
     });
 
     const input = await prisma.scoringInput.create({

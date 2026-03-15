@@ -29,7 +29,11 @@ function rowToProvider(row: YieldBoardRow): StablecoinProvider {
   const category = row.category ?? "DeFi";
   const apyMin = row.apyMin != null ? Math.round(row.apyMin * 100) : 0;
   const apyMax = row.apyMax != null ? Math.round(row.apyMax * 100) : 0;
-  const supportedProtos: StablecoinProto[] = row.stablecoin ? [row.stablecoin as StablecoinProto] : [];
+  const supportedProtos: StablecoinProto[] = (row.stablecoinTypes?.length
+    ? row.stablecoinTypes.filter((t): t is StablecoinProto => t === "USDC" || t === "USDT")
+    : row.stablecoin
+      ? [row.stablecoin as StablecoinProto]
+      : []);
   const initials = row.name.slice(0, 2).toUpperCase();
   return {
     name: row.name,
@@ -52,7 +56,9 @@ function providersFromRows(
   selectedProto: StablecoinProto
 ): { defi: StablecoinProvider[]; cefi: StablecoinProvider[] } {
   const filtered = rows.filter(
-    (r) => r.stablecoin === selectedProto && r.category
+    (r) =>
+      r.category &&
+      (r.stablecoinTypes?.includes(selectedProto) ?? r.stablecoin === selectedProto)
   );
   const defi = filtered
     .filter((r) => r.category === "DeFi")

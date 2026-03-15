@@ -8,17 +8,19 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 type BillingInterval = "month" | "year";
 
-/** Extract period and interval from Stripe Subscription (top-level or first item). */
-function getPeriodFromSubscription(sub: {
+type SubscriptionLike = {
   current_period_start?: number | null;
   current_period_end?: number | null;
-  items?: { data?: Array<{ current_period_start?: number; current_period_end?: number; price?: { recurring?: { interval?: string } } }> };
-}): { periodStart: Date; periodEnd: Date | null; interval: BillingInterval | null } {
+  items?: { data?: Array<{ current_period_start?: number; current_period_end?: number; price?: { recurring?: { interval?: string } | null } }> };
+};
+
+/** Extract period and interval from Stripe Subscription (top-level or first item). */
+function getPeriodFromSubscription(sub: SubscriptionLike): { periodStart: Date; periodEnd: Date | null; interval: BillingInterval | null } {
   const start =
     sub.current_period_start ?? sub.items?.data?.[0]?.current_period_start ?? null;
   const end =
     sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end ?? null;
-  const rawInterval = sub.items?.data?.[0]?.price?.recurring?.interval;
+  const rawInterval = sub.items?.data?.[0]?.price?.recurring?.interval ?? undefined;
   const interval: BillingInterval | null =
     rawInterval === "month" || rawInterval === "year" ? rawInterval : null;
   return {
@@ -102,7 +104,7 @@ export async function POST(req: NextRequest) {
         let interval: BillingInterval | null = null;
         const subObj = typeof subscriptionRaw === "object" && subscriptionRaw !== null ? (subscriptionRaw as Stripe.Subscription) : null;
         if (subObj) {
-          const period = getPeriodFromSubscription(subObj);
+          const period = getPeriodFromSubscription(subObj as SubscriptionLike);
           periodStart = period.periodStart;
           periodEnd = period.periodEnd;
           interval = period.interval;
@@ -110,7 +112,7 @@ export async function POST(req: NextRequest) {
         if (periodEnd == null) {
           try {
             const sub = await stripe.subscriptions.retrieve(subscriptionId, { expand: ["items.data.price"] });
-            const period = getPeriodFromSubscription(sub);
+            const period = getPeriodFromSubscription(sub as SubscriptionLike);
             periodStart = period.periodStart;
             periodEnd = period.periodEnd;
             interval = interval ?? period.interval;

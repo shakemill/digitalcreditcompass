@@ -35,7 +35,7 @@ export function AdminSiteSettingsCard() {
   return (
     <div className="rounded-xl border border-border bg-surface-card p-6 shadow-sm">
       <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-elevated text-text-secondary">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary">
           <Settings className="h-6 w-6" />
         </div>
         <div className="min-w-0 flex-1">

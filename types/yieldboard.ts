@@ -20,8 +20,10 @@ export interface YieldBoardRow {
   custody?: boolean;
   // Stablecoin-specific
   stablecoin?: string;
+  stablecoinTypes?: string[];
   category?: "DeFi" | "CeFi";
-  pegType?: "fiat-backed" | "crypto" | "algo";
+  pegType?: string;
+  notes?: string;
   maxDepeg90d?: number;
   withdrawalSpeed?: "instant" | "<7d" | "<30d" | "locked";
   // Fiat-specific

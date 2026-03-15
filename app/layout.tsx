@@ -23,7 +23,7 @@ const dmMono = DM_Mono({
 const siteName = "Digital Credit Compass";
 const motto = "Clarity Before Yield";
 const defaultDescription =
-  "Digital Credit Compass (DCC) is an independent planning platform for Bitcoin-backed and stablecoin income. Model yield, stress-test scenarios, compare strategies, and generate reports with transparent risk—without selling your Bitcoin.";
+  "Digital Credit Compass (DCC) is an independent planning and analysis platform that enables users to simulate and compare Bitcoin-backed, fiat, and stablecoin income structures using standardized risk scoring, scenario modeling, and risk analysis ready reports — without custody of assets and without execution of transactions.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://digitalcreditcompass.com"),
@@ -75,7 +75,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-surface-base">
       <body
-        className={`${lato.variable} ${syne.variable} ${dmMono.variable} min-h-screen bg-surface-base font-sans text-text-primary antialiased`}
+        className={`${lato.variable} ${syne.variable} ${dmMono.variable} min-h-screen overflow-x-hidden bg-surface-base font-sans text-text-primary antialiased`}
       >
         {children}
       </body>

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSession } from "@/hooks/useSession";
+import { useSidebar } from "@/components/layout/SidebarProvider";
 import {
   Coins,
   Banknote,
@@ -12,14 +12,13 @@ import {
   FileText,
   LayoutList,
   Layers,
-  User,
   Shield,
   Package,
   FileCheck,
   LayoutDashboard,
-  ChevronDown,
-  UserCircle,
-  LogOut,
+  X,
+  Users,
+  Search,
   type LucideIcon,
 } from "lucide-react";
 
@@ -59,48 +58,29 @@ const adminNav: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/admin", label: "Dashboard", Icon: Shield },
   { href: "/admin/providers", label: "Providers", Icon: Package },
   { href: "/admin/evidence-packs", label: "Evidence Packs", Icon: FileCheck },
+  { href: "/admin/users", label: "Users", Icon: Users },
+  { href: "/admin/seo", label: "SEO", Icon: Search },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { user } = useSession();
-  const activeColor = getActiveModuleColor(pathname);
+  const sidebarCtx = useSidebar();
+  const isDesktop = sidebarCtx?.isDesktop ?? true;
+  const sidebarOpen = sidebarCtx?.sidebarOpen ?? false;
+  const setSidebarOpen = sidebarCtx?.setSidebarOpen ?? (() => {});
   const isSuperAdmin = user?.role === "SUPER_ADMIN";
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const closeDrawer = () => setSidebarOpen(false);
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  async function handleLogout() {
-    setDropdownOpen(false);
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-    } finally {
-      router.push("/auth/login");
-      router.refresh();
-    }
-  }
-
-  return (
-    <aside
-      className="flex w-[260px] shrink-0 flex-col border-r border-border bg-surface-card font-sans shadow-[2px_0_12px_-4px_rgba(0,0,0,0.06)]"
-      style={{ width: 260 }}
-    >
+  const sidebarContent = (
+    <>
       {/* Logo */}
-      <div className="flex items-center border-b border-border px-6 py-5">
+      <div className="flex items-center justify-between border-b border-border px-6 py-5">
         <Link
-          href={pathname.startsWith("/admin") ? "/admin" : pathname.startsWith("/dashboard") ? "/dashboard" : "/planner/btc"}
+          href="/"
           className="flex items-center transition-opacity hover:opacity-80"
-          aria-label="DCC Home"
+          aria-label="Go to landing page"
+          onClick={closeDrawer}
         >
           <Image
             src="/logo-dcc.png"
@@ -112,11 +92,22 @@ export function Sidebar() {
             unoptimized
           />
         </Link>
+        {!isDesktop && (
+          <button
+            type="button"
+            onClick={closeDrawer}
+            className="rounded-lg p-2 text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary"
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-5">
         <Link
           href="/dashboard"
+          onClick={closeDrawer}
           className={`relative flex items-center gap-3 rounded-xl py-3 text-sm font-medium transition-all duration-200 ${
             pathname === "/dashboard" || pathname.startsWith("/dashboard/")
               ? "pl-4 pr-3"
@@ -150,6 +141,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={closeDrawer}
               className={`relative flex items-center gap-3 rounded-xl py-3 text-sm font-medium transition-all duration-200 ${
                 isActive ? "pl-4 pr-3" : "px-3 text-text-secondary hover:bg-surface-hover hover:text-text-primary"
               }`}
@@ -186,6 +178,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={closeDrawer}
               className={`relative flex items-center gap-3 rounded-xl py-3 text-sm font-medium transition-all duration-200 ${
                 isActive ? "pl-4 pr-3" : "px-3 text-text-secondary hover:bg-surface-hover hover:text-text-primary"
               }`}
@@ -224,6 +217,7 @@ export function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={closeDrawer}
                   className={`relative flex items-center gap-3 rounded-xl py-3 text-sm font-medium transition-all duration-200 ${
                     isActive ? "pl-4 pr-3" : "px-3 text-text-secondary hover:bg-surface-hover hover:text-text-primary"
                   }`}
@@ -251,53 +245,28 @@ export function Sidebar() {
           </>
         )}
       </nav>
+    </>
+  );
 
-      {/* User dropdown */}
-      <div className="relative border-t border-border p-4" ref={dropdownRef}>
-        <button
-          type="button"
-          onClick={() => setDropdownOpen((o) => !o)}
-          className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-surface-elevated/80 px-3 py-2.5 shadow-sm transition-colors hover:bg-surface-hover"
-          aria-expanded={dropdownOpen}
-          aria-haspopup="true"
-        >
-          <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--primary)]"
-            style={{ backgroundColor: "var(--primary-dim)" }}
-            aria-hidden
-          >
-            <User className="h-4 w-4" />
-          </div>
-          <span className="min-w-0 flex-1 truncate text-left text-sm font-semibold text-text-primary">
-            {user?.name?.trim() || user?.email || "User"}
-          </span>
-          <ChevronDown
-            className={`h-4 w-4 shrink-0 text-text-muted transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
-            aria-hidden
-          />
-        </button>
+  if (isDesktop) {
+    return (
+      <aside
+        className="flex w-[260px] shrink-0 flex-col border-r border-border bg-surface-card font-sans shadow-[2px_0_12px_-4px_rgba(0,0,0,0.06)]"
+        style={{ width: 260 }}
+      >
+        {sidebarContent}
+      </aside>
+    );
+  }
 
-        {dropdownOpen && (
-          <div className="absolute bottom-16 left-4 right-4 z-50 flex flex-col gap-0.5 rounded-xl border border-border bg-surface-card py-1 shadow-lg">
-            <Link
-              href="/dashboard/profile"
-              onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
-            >
-              <UserCircle className="h-4 w-4 shrink-0" />
-              Modifier le profil
-            </Link>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
-            >
-              <LogOut className="h-4 w-4 shrink-0" />
-              Déconnexion
-            </button>
-          </div>
-        )}
-      </div>
-    </aside>
+  return (
+    <div
+      className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-border bg-surface-card font-sans shadow-xl transition-transform duration-200 ease-out"
+      style={{
+        transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
+      }}
+    >
+      {sidebarContent}
+    </div>
   );
 }

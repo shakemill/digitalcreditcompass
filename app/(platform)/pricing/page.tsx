@@ -128,7 +128,10 @@ export default function PricingPage() {
     }
   }
 
-  const whopUrl = process.env.NEXT_PUBLIC_WHOP_PRO_URL ?? "#";
+  const whopCheckoutAnnual = process.env.NEXT_PUBLIC_WHOP_CHECKOUT_ANNUAL?.trim() || process.env.NEXT_PUBLIC_WHOP_PRO_URL?.trim();
+  const whopCheckoutMonthly = process.env.NEXT_PUBLIC_WHOP_CHECKOUT_MONTHLY?.trim();
+  const whopUrlForInterval = billingInterval === "year" ? whopCheckoutAnnual : (whopCheckoutMonthly || whopCheckoutAnnual);
+  const hasWhopUrl = !!(whopUrlForInterval && whopUrlForInterval !== "#");
   const isFree = user?.role === "FREE";
   const isProOrAdmin = user?.role === "PRO" || user?.role === "SUPER_ADMIN";
 
@@ -228,17 +231,17 @@ export default function PricingPage() {
                 {checkoutLoading ? "Redirecting…" : billingInterval === "year" ? "Subscribe annually — Stripe" : "Subscribe monthly — Stripe"}
               </button>
             )}
-            {whopUrl && whopUrl !== "#" && (
+            {hasWhopUrl && (
               <a
-                href={whopUrl}
+                href={whopUrlForInterval}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full rounded-lg border border-border py-3 text-center text-sm font-medium text-text-primary hover:bg-surface-hover"
               >
-                Pay with Whop
+                {billingInterval === "year" ? "Subscribe annually — Whop" : "Subscribe monthly — Whop"}
               </a>
             )}
-            {!canCheckout && (!whopUrl || whopUrl === "#") && (
+            {!canCheckout && !hasWhopUrl && (
               <p className="text-sm text-text-muted">Payment options are not configured. Contact support.</p>
             )}
           </div>
@@ -404,14 +407,14 @@ export default function PricingPage() {
                 {checkoutLoading ? "Redirecting…" : billingInterval === "year" ? "Unlock PRO — annual (Stripe)" : "Unlock PRO — monthly (Stripe)"}
               </button>
             )}
-            {whopUrl && whopUrl !== "#" && (
+            {hasWhopUrl && (
               <a
-                href={whopUrl}
+                href={whopUrlForInterval}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full rounded-lg border border-border py-3 text-center text-sm font-medium text-text-primary hover:bg-surface-hover"
               >
-                Unlock with Whop
+                {billingInterval === "year" ? "Unlock PRO — annual (Whop)" : "Unlock PRO — monthly (Whop)"}
               </a>
             )}
           </div>

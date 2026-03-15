@@ -3,22 +3,22 @@ import { Target, LineChart, BarChart3, FileSearch } from "lucide-react";
 const STEPS = [
   {
     title: "Define Objective",
-    description: "Set your income goals and constraints. Choose capital, duration, and risk preference.",
+    description: "Specify capital, time horizon, and acceptable risk parameters.",
     Icon: Target,
   },
   {
     title: "Stress Test",
-    description: "Run scenarios against market stress. See how strategies behave under different conditions.",
+    description: "Simulate strategy performance across multiple market conditions.",
     Icon: LineChart,
   },
   {
     title: "Compare",
-    description: "Compare providers and allocations side by side. Use the Yield Board for full analytics.",
+    description: "Evaluate providers and allocations using standardized safety scores and yield metrics.",
     Icon: BarChart3,
   },
   {
-    title: "Report",
-    description: "Generate suitability reports and PDFs. Share clear, documented analysis with clients.",
+    title: "Generate Risk Analysis Report",
+    description: "Export a risk analysis report documenting assumptions, scores, and scenario results.",
     Icon: FileSearch,
   },
 ];
@@ -32,7 +32,7 @@ export function HowItWorks() {
             How Digital Credit Compass <span className="text-[var(--primary)]">Works</span>
           </h2>
           <p className="mt-2 text-text-secondary">
-            A systematic approach to evaluating yield without guessing risk.
+            A structured framework for evaluating digital yield strategies.
           </p>
         </div>
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

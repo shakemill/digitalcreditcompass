@@ -28,7 +28,7 @@ export function AccentStrip() {
 
   return (
     <div
-      className="h-[3px] w-full shrink-0 opacity-95"
+      className="h-[3px] min-w-0 shrink-0 w-full opacity-95"
       style={{
         background: `linear-gradient(90deg, ${color} 0%, ${color}50 60%, ${color}20 85%, transparent 100%)`,
       }}

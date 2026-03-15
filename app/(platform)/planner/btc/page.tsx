@@ -160,7 +160,7 @@ export default function BtcPlannerPage() {
               : " — Custody (0% yield)"}
           </p>
         )}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard
             label="BTC Required"
             value={result ? result.btcRequired.toFixed(4) : "—"}
@@ -189,7 +189,7 @@ export default function BtcPlannerPage() {
       </div>
 
       {/* ── GRILLE 2 COLONNES ── */}
-      <div className="grid gap-5" style={{ gridTemplateColumns: "2.1fr 1fr" }}>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[2.1fr_1fr]">
 
         {/* COLONNE GAUCHE */}
         <div className="space-y-5">
@@ -219,7 +219,7 @@ export default function BtcPlannerPage() {
                 Inputs
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <FormField label="Total Need 12m (USD)">
                   <input
                     type="number"
@@ -246,8 +246,8 @@ export default function BtcPlannerPage() {
                   <input
                     type="number"
                     min={0}
-                    step={0.1}
-                    value={state.apr === 0 ? "" : state.apr}
+                    step={0.01}
+                    value={state.apr === 0 ? "" : Number(state.apr).toFixed(2)}
                     onChange={e => setField("apr", e.target.value === "" ? 0 : Number(e.target.value) || 0)}
                     className="w-full bg-surface-base border-[1.5px] border-border rounded-lg
                       px-3 py-2 font-mono text-[12.5px] text-text-primary outline-none
@@ -301,7 +301,7 @@ export default function BtcPlannerPage() {
                 Computed Results
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <ResultCell
                   label="BTC Required"
                   value={result ? result.btcRequired.toFixed(4) : "—"}
@@ -343,7 +343,7 @@ export default function BtcPlannerPage() {
                   sub={
                     selectedProvider
                       ? `APY ${selectedProvider.name} ${selectedProvider.apy} × ${state.durationMonths}m`
-                      : `APR ${state.apr}% × ${state.durationMonths}m`
+                      : `APR ${Number(state.apr).toFixed(2)}% × ${state.durationMonths}m`
                   }
                   valueColor="#7C3AED"
                 />
@@ -371,8 +371,9 @@ export default function BtcPlannerPage() {
                 Scenario Comparison
               </div>
 
+              <div className="min-w-0 overflow-x-auto">
               {/* Headers */}
-              <div className="grid gap-1.5" style={{ gridTemplateColumns: "1.2fr repeat(4, 1fr)" }}>
+              <div className="grid min-w-[320px] gap-1.5" style={{ gridTemplateColumns: "1.2fr repeat(4, 1fr)" }}>
                 <div />
                 {[10, 25, 50, 75].map(pct => (
                   <div key={pct} className="text-center py-2 rounded-lg border-[1.5px] font-mono text-[8px] font-medium"
@@ -387,7 +388,7 @@ export default function BtcPlannerPage() {
               </div>
 
               {/* BTC Required row */}
-              <div className="grid gap-1.5" style={{ gridTemplateColumns: "1.2fr repeat(4, 1fr)" }}>
+              <div className="grid min-w-[320px] gap-1.5" style={{ gridTemplateColumns: "1.2fr repeat(4, 1fr)" }}>
                 <div className="flex items-center font-mono text-[8.5px] text-text-muted">BTC Required</div>
                 {scenarioRows.map(sc => (
                   <div key={sc.ltv} className="text-center py-2 bg-surface-base border-[1.5px] border-border rounded-lg">
@@ -399,7 +400,7 @@ export default function BtcPlannerPage() {
               </div>
 
               {/* Liquidation row */}
-              <div className="grid gap-1.5" style={{ gridTemplateColumns: "1.2fr repeat(4, 1fr)" }}>
+              <div className="grid min-w-[320px] gap-1.5" style={{ gridTemplateColumns: "1.2fr repeat(4, 1fr)" }}>
                 <div className="flex items-center font-mono text-[8.5px] text-text-muted">Liq. Price</div>
                 {scenarioRows.map(sc => (
                   <div key={sc.ltv} className="text-center py-2 bg-surface-base border-[1.5px] border-border rounded-lg">
@@ -411,7 +412,7 @@ export default function BtcPlannerPage() {
               </div>
 
               {/* Risk Band row */}
-              <div className="grid gap-1.5" style={{ gridTemplateColumns: "1.2fr repeat(4, 1fr)" }}>
+              <div className="grid min-w-[320px] gap-1.5" style={{ gridTemplateColumns: "1.2fr repeat(4, 1fr)" }}>
                 <div className="flex items-center font-mono text-[8.5px] text-text-muted">Risk Band</div>
                 {scenarioRows.map(sc => (
                   <div key={sc.ltv} className="flex items-center justify-center py-2 bg-surface-base border-[1.5px] border-border rounded-lg gap-1">
@@ -423,6 +424,7 @@ export default function BtcPlannerPage() {
                     </span>
                   </div>
                 ))}
+              </div>
               </div>
 
               {/* CTA */}
@@ -510,7 +512,7 @@ export default function BtcPlannerPage() {
                         setSelectedProvider(null);
                       } else {
                         setSelectedProvider(p.name);
-                        setField("apr", p.apyPercent);
+                        setField("apr", Math.round(p.apyPercent * 100) / 100);
                       }
                     }}
                     onKeyDown={(e) => {
@@ -520,7 +522,7 @@ export default function BtcPlannerPage() {
                           setSelectedProvider(null);
                         } else {
                           setSelectedProvider(p.name);
-                          setField("apr", p.apyPercent);
+                          setField("apr", Math.round(p.apyPercent * 100) / 100);
                         }
                       }
                     }}

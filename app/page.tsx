@@ -8,29 +8,25 @@ import { LandingFAQ } from "@/components/landing/LandingFAQ";
 import { LandingCTA } from "@/components/landing/LandingCTA";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { ScrollReveal } from "@/components/landing/ScrollReveal";
-import { getComingSoonEnabled } from "@/lib/site-settings";
+import { getComingSoonEnabled, getLandingSEOSettings } from "@/lib/site-settings";
 import { getSessionFromCookie } from "@/lib/auth/session";
 
-export const metadata: Metadata = {
-  title: "Digital Credit Compass | Clarity Before Yield — Bitcoin & Stablecoin Income Planning",
-  description:
-    "Plan Bitcoin-backed and stablecoin income with transparent risk. Digital Credit Compass (DCC) lets you simulate yield, stress-test scenarios, compare strategies, and generate reports—without selling your Bitcoin.",
-  keywords: [
-    "Bitcoin yield planning",
-    "stablecoin income",
-    "digital credit compass",
-    "Clarity Before Yield",
-    "yield intelligence",
-    "risk analysis",
-    "income scenarios",
-    "crypto lending",
-  ],
-  openGraph: {
-    title: "Digital Credit Compass | Clarity Before Yield",
-    description:
-      "Plan Bitcoin-backed and stablecoin income with transparent risk. Simulate, compare, and report—without selling your Bitcoin.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getLandingSEOSettings();
+  return {
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
+    openGraph: {
+      title: seo.ogTitle,
+      description: seo.ogDescription,
+    },
+    twitter: {
+      title: seo.ogTitle,
+      description: seo.ogDescription,
+    },
+  };
+}
 
 export default async function HomePage() {
   const comingSoonEnabled = await getComingSoonEnabled();

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 
+const stablecoinTypesSchema = z.array(z.enum(["USDC", "USDT"])).nullable().optional();
+
 const patchSchema = z.object({
   name: z.string().min(1).optional(),
   slug: z.string().min(1).optional(),
@@ -9,11 +11,15 @@ const patchSchema = z.object({
   domicile: z.string().min(1).optional(),
   jurisdictionTier: z.enum(["T1", "T2", "T3", "UNKNOWN"]).optional(),
   isActive: z.boolean().optional(),
-  apyMin: z.number().nullable().optional(),
-  apyMax: z.number().nullable().optional(),
+  apyMin: z.preprocess((v) => (v === "" ? null : v === undefined ? undefined : Number(v)), z.number().nullable().optional()),
+  apyMax: z.preprocess((v) => (v === "" ? null : v === undefined ? undefined : Number(v)), z.number().nullable().optional()),
   maxLtv: z.number().nullable().optional(),
   liquidationLtv: z.number().nullable().optional(),
   rehypothecation: z.enum(["NO", "DISCLOSED", "UNDISCLOSED"]).optional(),
+  providerCategory: z.enum(["CEFI", "DEFI"]).nullable().optional(),
+  stablecoinTypes: stablecoinTypesSchema,
+  pegType: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
 });
 
 export async function GET(
@@ -78,6 +84,32 @@ export async function PATCH(
     });
     return NextResponse.json(provider);
   } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const existing = await db.provider.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ error: "Provider not found" }, { status: 404 });
+    }
+    await db.$transaction(async (tx) => {
+      await tx.scoreSnapshot.deleteMany({ where: { providerId: id } });
+      await tx.scoringInput.deleteMany({ where: { providerId: id } });
+      await tx.evidencePack.deleteMany({ where: { providerId: id } });
+      await tx.provider.delete({ where: { id } });
+    });
+    return new NextResponse(null, { status: 204 });
+  } catch (e) {
+    console.error("[DELETE /api/providers/[id]]", e);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

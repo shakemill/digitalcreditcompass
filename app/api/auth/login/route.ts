@@ -32,6 +32,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (user.isActive === false) {
+      return NextResponse.json(
+        { error: "This account has been deactivated. Contact support." },
+        { status: 403 }
+      );
+    }
+
     const ok = await verifyPassword(password, user.passwordHash);
     if (!ok) {
       return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });

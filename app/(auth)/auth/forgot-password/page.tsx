@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { KeyRound } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -65,15 +65,9 @@ export default function ForgotPasswordPage() {
   return (
     <div className="w-full max-w-sm rounded-xl border border-border bg-surface-card p-8 shadow-sm">
       <div className="mb-6 flex justify-center">
-        <Image
-          src="/logo-dcc.png"
-          alt="DCC"
-          width={50}
-          height={50}
-          className="h-[50px] w-auto object-contain"
-          priority
-          unoptimized
-        />
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary" aria-hidden>
+          <KeyRound className="h-6 w-6" />
+        </div>
       </div>
       <h1 className="text-center font-heading text-lg font-semibold text-text-primary">
         Forgot password

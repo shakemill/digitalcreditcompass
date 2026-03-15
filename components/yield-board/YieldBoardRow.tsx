@@ -227,6 +227,9 @@ export function YieldBoardRow({
       ? `${(row.apyMin * 100).toFixed(1)}% – ${(row.apyMax * 100).toFixed(1)}%`
       : "—";
 
+  const stablecoinDisplay = (row.stablecoinTypes?.length ? row.stablecoinTypes.join(", ") : row.stablecoin) ?? "—";
+  const pegDisplay = row.pegType ?? "";
+
   const stablecoinContent: Record<string, React.ReactNode> = {
     provider: (
       <div className="flex min-w-0 items-center gap-2">
@@ -236,9 +239,10 @@ export function YieldBoardRow({
         <span className="min-w-0 truncate text-sm font-semibold text-gray-900" title={displayName}>{displayName}</span>
       </div>
     ),
+    type: <span className="text-xs text-gray-700">{row.category ?? "—"}</span>,
     dccScore: <ScoreBadge score={row.dccScore} band={row.riskBand} />,
     apy: apyStr,
-    stablecoinPeg: <>{row.stablecoin ?? "—"} {row.pegType ?? ""}</>,
+    stablecoinPeg: <>{stablecoinDisplay} {pegDisplay ? ` · ${pegDisplay}` : ""}</>,
     depeg90d: row.maxDepeg90d != null ? `${(row.maxDepeg90d * 100).toFixed(2)}%` : "—",
     withdrawal: row.withdrawalSpeed ?? "—",
     scoreVerified: verifiedDate,
@@ -356,9 +360,11 @@ export function YieldBoardRow({
                         </div>
                       ))}
                   </div>
-                  <p><strong>Stablecoin & Peg:</strong> {row.stablecoin ?? "—"} {row.pegType ?? ""}</p>
+                  <p><strong>Type:</strong> {row.category ?? "—"}</p>
+                  <p><strong>Stablecoin & Peg:</strong> {stablecoinDisplay} {pegDisplay ? ` · ${pegDisplay}` : ""}</p>
                   <p><strong>90d Max Depeg:</strong> {row.maxDepeg90d != null ? `${(row.maxDepeg90d * 100).toFixed(2)}%` : "—"}</p>
                   <p><strong>Withdrawal:</strong> {row.withdrawalSpeed ?? "—"}</p>
+                  {row.notes ? <p className="md:col-span-2"><strong>Notes:</strong> {row.notes}</p> : null}
                   {row.evidenceLinks?.length ? (
                     <p className="md:col-span-2"><strong>Evidence:</strong> {row.evidenceLinks.map((e) => e.label).join(", ")}</p>
                   ) : null}

@@ -408,7 +408,7 @@ export default function PlannerStablecoinPage() {
   return (
     <div className="min-h-full w-full max-w-[1600px] space-y-5">
       {/* STAT CARDS */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Active stablecoin"
           value={state.selectedProto ?? "—"}
@@ -436,7 +436,7 @@ export default function PlannerStablecoinPage() {
       </div>
 
       {/* GRILLE 2 COLONNES */}
-      <div className="grid gap-5" style={{ gridTemplateColumns: "2.1fr 1fr" }}>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[2.1fr_1fr]">
         {/* COLONNE GAUCHE */}
         <div className="space-y-5">
           <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">

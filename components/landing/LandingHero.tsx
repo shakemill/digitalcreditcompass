@@ -13,7 +13,7 @@ export function LandingHero() {
           <span className="text-[var(--primary)]">Transparent Risk</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-base text-text-secondary sm:text-lg">
-          Digital Credit Compass (DCC) is an independent planning platform that lets you simulate, compare Bitcoin-backed and stablecoin income, understand risk, model scenarios, generate reports, and run analysis—without selling your Bitcoin.
+          Digital Credit Compass (DCC) is an independent planning and analysis platform that enables users to simulate and compare Bitcoin-backed, fiat, and stablecoin income structures using standardized risk scoring, scenario modeling, and risk analysis ready reports — without custody of assets and without execution of transactions.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link

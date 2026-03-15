@@ -8,6 +8,11 @@ datasource db {
 }
 
 // ── PROVIDERS ──────────────────────────────────────────────
+enum ProviderCategory {
+  CEFI
+  DEFI
+}
+
 model Provider {
   id              String   @id @default(cuid())
   name            String
@@ -21,6 +26,11 @@ model Provider {
   maxLtv          Float?
   liquidationLtv  Float?
   rehypothecation ReyhypType @default(UNDISCLOSED)
+  // Stablecoin-only (when plannerType = STABLECOIN)
+  providerCategory ProviderCategory?
+  stablecoinTypes   Json?    // ["USDC"], ["USDT"], or ["USDC", "USDT"]
+  pegType           String?
+  notes             String?  @db.Text
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -206,6 +216,7 @@ model User {
   name                      String
   passwordHash              String
   role                      UserRole  @default(FREE)
+  isActive                  Boolean   @default(true)
   emailVerified             Boolean   @default(false)
   emailVerificationToken    String?
   emailVerificationExpiresAt DateTime?

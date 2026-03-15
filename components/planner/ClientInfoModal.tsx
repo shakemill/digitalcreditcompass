@@ -3,12 +3,6 @@
 import { useState, useEffect } from "react";
 import type { ClientInfo } from "@/context/PlannerContext";
 
-const RISK_OPTIONS: ClientInfo["riskPreference"][] = [
-  "Conservative",
-  "Moderate",
-  "Aggressive",
-];
-
 export function ClientInfoModal({
   module,
   defaultClientName = "",
@@ -23,8 +17,6 @@ export function ClientInfoModal({
   generating?: boolean;
 }) {
   const [clientName, setClientName] = useState(defaultClientName);
-  const [riskPreference, setRiskPreference] =
-    useState<ClientInfo["riskPreference"]>("Moderate");
 
   useEffect(() => {
     setClientName(defaultClientName);
@@ -34,7 +26,7 @@ export function ClientInfoModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onConfirm({ clientName, riskPreference });
+    onConfirm({ clientName, riskPreference: "Moderate" });
   };
 
   return (
@@ -71,28 +63,6 @@ export function ClientInfoModal({
               placeholder="Client name"
               className="w-full rounded border border-border bg-surface-base px-3 py-2 font-mono text-sm text-text-primary"
             />
-          </div>
-          <div>
-            <label
-              htmlFor="risk-preference"
-              className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-text-muted"
-            >
-              Risk preference
-            </label>
-            <select
-              id="risk-preference"
-              value={riskPreference}
-              onChange={(e) =>
-                setRiskPreference(e.target.value as ClientInfo["riskPreference"])
-              }
-              className="w-full rounded border border-border bg-surface-base px-3 py-2 font-mono text-sm text-text-primary"
-            >
-              {RISK_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
           </div>
           <div className="flex gap-2 pt-2">
             <button

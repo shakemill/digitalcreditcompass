@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { LogIn } from "lucide-react";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -51,13 +52,9 @@ function LoginForm() {
   return (
     <div className="w-full max-w-sm rounded-xl border border-border bg-surface-card p-8 shadow-sm">
       <div className="mb-6 flex justify-center">
-        <img
-          src="/logo-dcc.png"
-          alt="DCC"
-          width={120}
-          height={44}
-          className="h-12 w-auto object-contain"
-        />
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary" aria-hidden>
+          <LogIn className="h-6 w-6" />
+        </div>
       </div>
       <h1 className="text-center font-heading text-lg font-semibold text-text-primary">
         Sign in

@@ -18,6 +18,10 @@ type Provider = {
   maxLtv: number | null;
   liquidationLtv: number | null;
   rehypothecation: string;
+  providerCategory?: string | null;
+  stablecoinTypes?: string[] | null;
+  pegType?: string | null;
+  notes?: string | null;
   latestScoringInput?: Record<string, unknown> | null;
 };
 
@@ -84,6 +88,10 @@ export default function EditProviderPage() {
           maxLtv: data.maxLtv,
           liquidationLtv: data.liquidationLtv,
           rehypothecation: data.rehypothecation,
+          providerCategory: data.providerCategory ?? null,
+          stablecoinTypes: Array.isArray(data.stablecoinTypes) ? data.stablecoinTypes : null,
+          pegType: data.pegType ?? null,
+          notes: data.notes ?? null,
         });
         const input = data.latestScoringInput || {};
         const next: Record<string, number> = {};
@@ -102,14 +110,31 @@ export default function EditProviderPage() {
     setError("");
     setSuccess("");
     try {
+      const payload = {
+        name: identity.name,
+        slug: identity.slug,
+        domicile: identity.domicile,
+        jurisdictionTier: identity.jurisdictionTier,
+        isActive: !!identity.isActive,
+        apyMin: identity.apyMin != null ? Number(identity.apyMin) : null,
+        apyMax: identity.apyMax != null ? Number(identity.apyMax) : null,
+        maxLtv: identity.maxLtv != null ? Number(identity.maxLtv) : null,
+        liquidationLtv: identity.liquidationLtv != null ? Number(identity.liquidationLtv) : null,
+        rehypothecation: (identity.rehypothecation as string) ?? "NO",
+        providerCategory: identity.providerCategory ?? null,
+        stablecoinTypes: Array.isArray(identity.stablecoinTypes) ? identity.stablecoinTypes : null,
+        pegType: identity.pegType ?? null,
+        notes: identity.notes ?? null,
+      };
       const res = await fetch(`/api/providers/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(identity),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        const d = await res.json();
-        setError(d?.error?.message || "Failed to save");
+        const d = await res.json().catch(() => ({}));
+        const msg = d?.error?.message ?? (Array.isArray(d?.error) ? d.error.map((e: { path?: string[]; message?: string }) => e.message || JSON.stringify(e)).join(", ") : null);
+        setError(msg || "Failed to save");
         return;
       }
       const data = await res.json();
@@ -344,6 +369,101 @@ export default function EditProviderPage() {
                 <span className="text-sm font-medium text-text-primary">Active</span>
               </label>
             </div>
+            {provider.plannerType === "STABLECOIN" && (
+              <>
+                <div className="sm:col-span-2">
+                  <span className={labelClass}>Type</span>
+                  <div className="mt-2 flex gap-4">
+                    <label className="inline-flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="providerCategory"
+                        value="CEFI"
+                        checked={(identity.providerCategory as string) === "CEFI"}
+                        onChange={() => setIdentity((i) => ({ ...i, providerCategory: "CEFI" }))}
+                        className="border-border text-primary focus:ring-primary"
+                      />
+                      CeFi
+                    </label>
+                    <label className="inline-flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="providerCategory"
+                        value="DEFI"
+                        checked={(identity.providerCategory as string) === "DEFI"}
+                        onChange={() => setIdentity((i) => ({ ...i, providerCategory: "DEFI" }))}
+                        className="border-border text-primary focus:ring-primary"
+                      />
+                      DeFi
+                    </label>
+                  </div>
+                </div>
+                <div className="sm:col-span-2">
+                  <span className={labelClass}>Stablecoin(s)</span>
+                  <div className="mt-2 flex flex-wrap gap-4">
+                    <label className="inline-flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="stablecoinTypes"
+                        checked={
+                          Array.isArray(identity.stablecoinTypes) &&
+                          identity.stablecoinTypes.length === 1 &&
+                          identity.stablecoinTypes[0] === "USDC"
+                        }
+                        onChange={() => setIdentity((i) => ({ ...i, stablecoinTypes: ["USDC"] }))}
+                        className="border-border text-primary focus:ring-primary"
+                      />
+                      USDC
+                    </label>
+                    <label className="inline-flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="stablecoinTypes"
+                        checked={
+                          Array.isArray(identity.stablecoinTypes) &&
+                          identity.stablecoinTypes.length === 1 &&
+                          identity.stablecoinTypes[0] === "USDT"
+                        }
+                        onChange={() => setIdentity((i) => ({ ...i, stablecoinTypes: ["USDT"] }))}
+                        className="border-border text-primary focus:ring-primary"
+                      />
+                      USDT
+                    </label>
+                    <label className="inline-flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="stablecoinTypes"
+                        checked={
+                          Array.isArray(identity.stablecoinTypes) &&
+                          identity.stablecoinTypes.length === 2
+                        }
+                        onChange={() => setIdentity((i) => ({ ...i, stablecoinTypes: ["USDC", "USDT"] }))}
+                        className="border-border text-primary focus:ring-primary"
+                      />
+                      USDC & USDT
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>Peg type (optional)</label>
+                  <input
+                    value={(identity.pegType as string) ?? ""}
+                    onChange={(e) => setIdentity((i) => ({ ...i, pegType: e.target.value || null }))}
+                    className={inputClass}
+                    placeholder="e.g. Fiat-backed, Fiat / Crypto"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className={labelClass}>Notes (optional)</label>
+                  <textarea
+                    value={(identity.notes as string) ?? ""}
+                    onChange={(e) => setIdentity((i) => ({ ...i, notes: e.target.value || null }))}
+                    rows={3}
+                    className={inputClass}
+                  />
+                </div>
+              </>
+            )}
             {(provider.plannerType === "BTC" || provider.plannerType === "FIAT" || provider.plannerType === "STABLECOIN") && (
               <>
                 <div>

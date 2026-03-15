@@ -9,13 +9,13 @@ const NAV_LINKS = [
   { label: "Home", href: "/", sectionId: null },
   { label: "Features", href: "/#how-it-works", sectionId: "how-it-works" },
   { label: "Pricing", href: "/#pricing", sectionId: "pricing" },
-  { label: "FAQ", href: "/#faq", sectionId: "faq" },
+  { label: "Understanding DCC", href: "/#faq", sectionId: "faq" },
   { label: "Contact", href: "/#contact", sectionId: "contact" },
 ];
 
 const RISK_METHODOLOGY_HREF = "/api/download-risk-methodology";
 
-const SECTION_IDS = ["how-it-works", "pricing", "faq", "contact"];
+const SECTION_IDS = ["how-it-works", "pricing", "faq", "cta", "contact"];
 
 function getActiveSection(): string | null {
   if (typeof document === "undefined") return null;
@@ -37,7 +37,23 @@ function getActiveSection(): string | null {
 export function LandingHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [user, setUser] = useState<{ name: string | null; email: string } | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/session")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.user) return;
+        setUser({
+          name: data.user.name ?? null,
+          email: data.user.email ?? "",
+        });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (pathname !== "/") return;
@@ -52,7 +68,7 @@ export function LandingHeader() {
   const linkClass = (sectionId: string | null) => {
     const isActive =
       (sectionId === null && activeSection === null && pathname === "/") ||
-      (sectionId === "contact" && pathname === "/contact") ||
+      (sectionId === "contact" && (pathname === "/contact" || activeSection === "contact" || activeSection === "cta")) ||
       (sectionId !== null && sectionId !== "contact" && activeSection === sectionId);
     return `text-sm font-medium transition-colors ${
       isActive ? "text-[var(--primary)]" : "text-text-secondary hover:text-text-primary"
@@ -90,20 +106,37 @@ export function LandingHeader() {
           </Link>
         </nav>
         <div className="flex items-center gap-4">
-          <Link
-            href="/auth/login"
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-card hover:text-text-secondary"
-          >
-            <LogIn className="h-4 w-4 shrink-0" aria-hidden />
-            Sign in
-          </Link>
-          <Link
-            href="/auth/register"
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-          >
-            Get Started
-            <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
-          </Link>
+          {user ? (
+            <>
+              <span className="hidden text-sm font-medium text-text-primary sm:inline-block sm:max-w-[140px] sm:truncate md:max-w-[180px]" title={user.email}>
+                {user.name?.trim() || user.email}
+              </span>
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              >
+                Dashboard
+                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-card hover:text-text-secondary"
+              >
+                <LogIn className="h-4 w-4 shrink-0" aria-hidden />
+                Sign in
+              </Link>
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              >
+                Get Started
+                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+              </Link>
+            </>
+          )}
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -125,7 +158,7 @@ export function LandingHeader() {
                 onClick={() => setMobileOpen(false)}
                 className={`rounded-lg px-3 py-2 text-sm font-medium hover:bg-surface-hover ${
                   (sectionId === null && activeSection === null && pathname === "/") ||
-                  (sectionId === "contact" && pathname === "/contact") ||
+                  (sectionId === "contact" && (pathname === "/contact" || activeSection === "contact" || activeSection === "cta")) ||
                   (sectionId !== null && sectionId !== "contact" && activeSection === sectionId)
                     ? "text-[var(--primary)]"
                     : "text-text-secondary hover:text-text-primary"
@@ -142,6 +175,40 @@ export function LandingHeader() {
               <Download className="h-4 w-4 shrink-0" aria-hidden />
               Risk methodology
             </Link>
+            {user ? (
+              <div className="flex flex-col gap-2 border-t border-border pt-3">
+                <p className="truncate px-3 text-sm font-medium text-text-primary" title={user.email}>
+                  {user.name?.trim() || user.email}
+                </p>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  Dashboard
+                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                </Link>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 border-t border-border pt-3">
+                <Link
+                  href="/auth/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-hover"
+                >
+                  <LogIn className="h-4 w-4 shrink-0" aria-hidden />
+                  Sign in
+                </Link>
+                <Link
+                  href="/auth/register"
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  Get Started
+                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                </Link>
+              </div>
+            )}
           </nav>
         </div>
       )}

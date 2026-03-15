@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, FileCheck } from "lucide-react";
+import { Package, FileCheck, Users, Search } from "lucide-react";
 import { AdminSiteSettingsCard } from "@/components/admin/AdminSiteSettingsCard";
 
 export default function AdminDashboardPage() {
@@ -14,7 +14,7 @@ export default function AdminDashboardPage() {
           href="/admin/providers"
           className="flex items-center gap-4 rounded-xl border border-border bg-surface-card p-6 shadow-sm transition hover:border-border-strong hover:shadow"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-elevated text-text-secondary">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary">
             <Package className="h-6 w-6" />
           </div>
           <div>
@@ -28,7 +28,7 @@ export default function AdminDashboardPage() {
           href="/admin/evidence-packs"
           className="flex items-center gap-4 rounded-xl border border-border bg-surface-card p-6 shadow-sm transition hover:border-border-strong hover:shadow"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-elevated text-text-secondary">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary">
             <FileCheck className="h-6 w-6" />
           </div>
           <div>
@@ -38,19 +38,35 @@ export default function AdminDashboardPage() {
             </p>
           </div>
         </Link>
-      </div>
-      <p className="mt-8 text-sm text-text-secondary">
-        <Link href="/planner/btc" className="text-primary underline hover:opacity-90">
-          ← Back to platform
-        </Link>
-        {" · "}
         <Link
-          href="/yield-boards/btc"
-          className="text-primary underline hover:opacity-90"
+          href="/admin/users"
+          className="flex items-center gap-4 rounded-xl border border-border bg-surface-card p-6 shadow-sm transition hover:border-border-strong hover:shadow"
         >
-          Yield Board
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary">
+            <Users className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="font-medium text-text-primary">Users</h2>
+            <p className="text-sm text-text-secondary">
+              Manage users, activate/deactivate accounts, change plan.
+            </p>
+          </div>
         </Link>
-      </p>
+        <Link
+          href="/admin/seo"
+          className="flex items-center gap-4 rounded-xl border border-border bg-surface-card p-6 shadow-sm transition hover:border-border-strong hover:shadow"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary">
+            <Search className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="font-medium text-text-primary">Landing SEO</h2>
+            <p className="text-sm text-text-secondary">
+              Edit landing page title, description and keywords (English).
+            </p>
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }

@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Topbar } from "@/components/layout/Topbar";
-import { AccentStrip } from "@/components/layout/AccentStrip";
+import { PlatformShell } from "@/components/layout/PlatformShell";
 
 export default function AdminLayout({
   children,
@@ -44,26 +42,5 @@ export default function AdminLayout({
     );
   }
 
-  return (
-    <div className="flex min-h-screen flex-col bg-surface-base">
-      <div className="hidden flex-1 overflow-hidden lg:flex">
-        <Sidebar />
-        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-surface-base">
-          <Topbar />
-          <AccentStrip />
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-            <div className="flex min-h-full w-full min-w-0 flex-1 flex-col p-4 lg:p-6">
-              {children}
-            </div>
-          </div>
-        </main>
-      </div>
-      {/* Mobile: same as platform */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-5 p-8 lg:hidden">
-        <p className="text-center text-text-secondary">
-          Open on desktop for the best experience.
-        </p>
-      </div>
-    </div>
-  );
+  return <PlatformShell>{children}</PlatformShell>;
 }

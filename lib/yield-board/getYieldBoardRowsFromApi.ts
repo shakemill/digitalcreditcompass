@@ -17,6 +17,10 @@ type ApiProvider = {
   maxLtv?: number | null;
   liquidationLtv?: number | null;
   rehypothecation?: string;
+  providerCategory?: string | null;
+  stablecoinTypes?: string[] | null;
+  pegType?: string | null;
+  notes?: string | null;
   finalScore: number;
   riskBand: string;
   scoreVerifiedAt: string;
@@ -97,9 +101,14 @@ function mapApiProviderToRow(p: ApiProvider, index: number, plannerType: Planner
     row.incomeType = incomeTypeLabel(p.incomeMechanism);
   }
   if (plannerType === "stablecoin") {
-    row.stablecoin = stablecoinFromName(p.name, p.slug);
-    row.category = categoryFromProvider(p.name, p.slug);
-    row.pegType = "fiat-backed";
+    const stablecoinTypes = Array.isArray(p.stablecoinTypes) && p.stablecoinTypes.length > 0
+      ? p.stablecoinTypes
+      : (() => { const t = stablecoinFromName(p.name, p.slug); return t ? [t] : []; })();
+    row.stablecoinTypes = stablecoinTypes.length > 0 ? stablecoinTypes : undefined;
+    row.stablecoin = stablecoinTypes.length === 1 ? stablecoinTypes[0] : stablecoinTypes.length > 1 ? stablecoinTypes.join(", ") : undefined;
+    row.category = p.providerCategory === "DEFI" ? "DeFi" : p.providerCategory === "CEFI" ? "CeFi" : categoryFromProvider(p.name, p.slug);
+    row.pegType = p.pegType ?? "Fiat-backed";
+    if (p.notes) row.notes = p.notes;
     if (p.pegDeviation90d != null) row.maxDepeg90d = Math.abs(p.pegDeviation90d);
     else if (p.maxDrawdown90d != null) row.maxDepeg90d = Math.abs(p.maxDrawdown90d);
   }

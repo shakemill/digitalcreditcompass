@@ -130,7 +130,7 @@ export default function PlannerFiatPage() {
   return (
     <div className="min-h-full w-full max-w-[1600px] space-y-6">
       {/* 1. STAT CARDS ROW */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
           label="Selected Instruments"
           value={selectedInstruments.length}
@@ -165,10 +165,7 @@ export default function PlannerFiatPage() {
       </div>
 
       {/* 2. GRILLE 2 COLONNES */}
-      <div
-        className="grid gap-6"
-        style={{ gridTemplateColumns: "2.1fr 1fr" }}
-      >
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2.1fr_1fr]">
         {/* COLONNE GAUCHE */}
         <div className="space-y-6">
           <section className="rounded-lg border border-border bg-surface-card p-5">
@@ -389,7 +386,7 @@ export default function PlannerFiatPage() {
             <h2 className="mb-4 font-heading text-sm font-semibold uppercase tracking-wider text-text-primary">
               Projected Income
             </h2>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <ResultCell
                 label="Annual Income Min"
                 value={

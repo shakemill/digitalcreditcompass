@@ -66,6 +66,7 @@ const BTC_COLS: ColDef[] = [
 
 const STABLECOIN_COLS: ColDef[] = [
   { id: "provider", label: "Provider", align: "left", weight: 2.5 },
+  { id: "type", label: "Type", align: "left", weight: 0.8 },
   { id: "dccScore", label: "DCC Score", align: "left", weight: 1.2 },
   { id: "apy", label: "APY", align: "left", weight: 1 },
   { id: "stablecoinPeg", label: "Stablecoin & Peg", align: "left", weight: 1.5 },

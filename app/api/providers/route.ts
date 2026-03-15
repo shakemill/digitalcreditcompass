@@ -6,7 +6,12 @@ const querySchema = z.object({
   plannerType: z.enum(["BTC", "FIAT", "STABLECOIN"]).optional(),
   minScore: z.coerce.number().min(0).max(100).optional(),
   sort: z.enum(["score_desc", "score_asc", "name"]).optional(),
+  search: z.string().min(1).optional(),
+  page: z.coerce.number().min(1).optional(),
+  pageSize: z.coerce.number().min(1).max(100).optional(),
 });
+
+const stablecoinTypesSchema = z.array(z.enum(["USDC", "USDT"])).optional();
 
 const postSchema = z.object({
   name: z.string().min(1),
@@ -20,6 +25,10 @@ const postSchema = z.object({
   maxLtv: z.number().optional(),
   liquidationLtv: z.number().optional(),
   rehypothecation: z.enum(["NO", "DISCLOSED", "UNDISCLOSED"]).optional(),
+  providerCategory: z.enum(["CEFI", "DEFI"]).nullable().optional(),
+  stablecoinTypes: stablecoinTypesSchema,
+  pegType: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -29,14 +38,26 @@ export async function GET(req: NextRequest) {
       plannerType: searchParams.get("plannerType") ?? undefined,
       minScore: searchParams.get("minScore") ?? undefined,
       sort: searchParams.get("sort") ?? undefined,
+      search: searchParams.get("search")?.trim() || undefined,
+      page: searchParams.get("page") ?? undefined,
+      pageSize: searchParams.get("pageSize") ?? undefined,
     });
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues }, { status: 400 });
     }
-    const { plannerType, minScore, sort = "score_desc" } = parsed.data;
+    const { plannerType, minScore, sort = "score_desc", search, page = 1, pageSize = 10 } = parsed.data;
+
+    const where: Parameters<typeof db.provider.findMany>[0]["where"] = {};
+    if (plannerType) where.plannerType = plannerType;
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { slug: { contains: search, mode: "insensitive" } },
+      ];
+    }
 
     const providers = await db.provider.findMany({
-      where: plannerType ? { plannerType } : undefined,
+      where,
       include: {
         scoreSnapshots: {
           orderBy: { createdAt: "desc" },
@@ -66,13 +87,23 @@ export async function GET(req: NextRequest) {
       list.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    const result = list.map(({ scoreSnapshots, ...p }) => ({
+    const total = list.length;
+    const start = (page - 1) * pageSize;
+    const pageList = list.slice(start, start + pageSize);
+
+    const result = pageList.map(({ scoreSnapshots, ...p }) => ({
       ...p,
       latestScore: (p as { latestScore?: number }).latestScore,
       latestRiskBand: (p as { latestRiskBand?: string }).latestRiskBand,
     }));
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      providers: result,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    });
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },
@@ -102,6 +133,10 @@ export async function POST(req: NextRequest) {
         maxLtv: data.maxLtv,
         liquidationLtv: data.liquidationLtv,
         rehypothecation: data.rehypothecation,
+        providerCategory: data.providerCategory ?? undefined,
+        stablecoinTypes: data.stablecoinTypes ?? undefined,
+        pegType: data.pegType ?? undefined,
+        notes: data.notes ?? undefined,
       },
     });
     return NextResponse.json(provider);
