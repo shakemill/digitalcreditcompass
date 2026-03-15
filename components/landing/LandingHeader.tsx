@@ -106,37 +106,39 @@ export function LandingHeader() {
           </Link>
         </nav>
         <div className="flex items-center gap-4">
-          {user ? (
-            <>
-              <span className="hidden text-sm font-medium text-text-primary sm:inline-block sm:max-w-[140px] sm:truncate md:max-w-[180px]" title={user.email}>
-                {user.name?.trim() || user.email}
-              </span>
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-              >
-                Dashboard
-                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/auth/login"
-                className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-card hover:text-text-secondary"
-              >
-                <LogIn className="h-4 w-4 shrink-0" aria-hidden />
-                Sign in
-              </Link>
-              <Link
-                href="/auth/register"
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-              >
-                Get Started
-                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
-              </Link>
-            </>
-          )}
+          <div className="hidden items-center gap-4 md:flex">
+            {user ? (
+              <>
+                <span className="text-sm font-medium text-text-primary max-w-[180px] truncate" title={user.email}>
+                  {user.name?.trim() || user.email}
+                </span>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  Dashboard
+                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-card hover:text-text-secondary"
+                >
+                  <LogIn className="h-4 w-4 shrink-0" aria-hidden />
+                  Sign in
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  Get Started
+                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                </Link>
+              </>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -175,7 +177,7 @@ export function LandingHeader() {
               <Download className="h-4 w-4 shrink-0" aria-hidden />
               Risk methodology
             </Link>
-            {user ? (
+            {user && (
               <div className="flex flex-col gap-2 border-t border-border pt-3">
                 <p className="truncate px-3 text-sm font-medium text-text-primary" title={user.email}>
                   {user.name?.trim() || user.email}
@@ -186,25 +188,6 @@ export function LandingHeader() {
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
                 >
                   Dashboard
-                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
-                </Link>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2 border-t border-border pt-3">
-                <Link
-                  href="/auth/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-hover"
-                >
-                  <LogIn className="h-4 w-4 shrink-0" aria-hidden />
-                  Sign in
-                </Link>
-                <Link
-                  href="/auth/register"
-                  onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-                >
-                  Get Started
                   <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                 </Link>
               </div>
