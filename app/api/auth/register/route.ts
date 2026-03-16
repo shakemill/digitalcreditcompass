@@ -51,8 +51,10 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_APP_URL?.trim() ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "").trim() ||
       "http://localhost:3000";
+    const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
+    let emailSent = false;
     try {
-      await sendVerificationEmail(email, name, `${baseUrl}/api/auth/verify-email?token=${token}`);
+      emailSent = await sendVerificationEmail(email, name, verifyUrl);
     } catch (emailErr) {
       console.error("[register] Verification email failed:", emailErr);
       // User is already created; do not fail the request
@@ -60,7 +62,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Check your email to activate your account.",
+      emailSent,
+      message: emailSent
+        ? "Check your email to activate your account."
+        : "Account created. Verification email could not be sent (SMTP not configured or failed). Please contact support to activate your account.",
     });
   } catch (e) {
     console.error("Register error:", e);

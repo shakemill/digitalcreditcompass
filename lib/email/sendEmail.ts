@@ -23,15 +23,16 @@ function getTransport() {
   });
 }
 
+/** Returns true if the email was sent, false if SMTP is not configured. Throws if send fails. */
 export async function sendVerificationEmail(
   email: string,
   name: string,
   verifyUrl: string
-): Promise<void> {
+): Promise<boolean> {
   const transport = getTransport();
   if (!transport) {
     console.warn("[email] SMTP not configured; skipping verification email to", email);
-    return;
+    return false;
   }
 
   await transport.sendMail({
@@ -47,6 +48,7 @@ export async function sendVerificationEmail(
     `,
     text: `Hi ${name}, please verify your email: ${verifyUrl} (expires in 24 hours). — DCC Team`,
   });
+  return true;
 }
 
 export async function sendPasswordResetEmail(
