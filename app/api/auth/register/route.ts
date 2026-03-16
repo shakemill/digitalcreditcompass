@@ -51,7 +51,12 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_APP_URL?.trim() ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "").trim() ||
       "http://localhost:3000";
-    await sendVerificationEmail(email, name, `${baseUrl}/api/auth/verify-email?token=${token}`);
+    try {
+      await sendVerificationEmail(email, name, `${baseUrl}/api/auth/verify-email?token=${token}`);
+    } catch (emailErr) {
+      console.error("[register] Verification email failed:", emailErr);
+      // User is already created; do not fail the request
+    }
 
     return NextResponse.json({
       success: true,
