@@ -22,6 +22,12 @@ function LoginForm() {
     else if (err === "missing_token") setError("Missing verification token.");
   }, [searchParams]);
 
+  const whopClientId = process.env.NEXT_PUBLIC_WHOP_CLIENT_ID;
+  const whopRedirectUri = process.env.NEXT_PUBLIC_WHOP_REDIRECT_URI || `${typeof window !== "undefined" ? window.location.origin : ""}/api/auth/whop`;
+  const whopOAuthUrl = whopClientId
+    ? `https://whop.com/oauth?client_id=${whopClientId}&redirect_uri=${encodeURIComponent(whopRedirectUri)}&response_type=code&scope=openid`
+    : null;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -112,6 +118,28 @@ function LoginForm() {
           {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
+      {whopOAuthUrl && (
+        <>
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-surface-card px-2 text-text-muted">or</span>
+            </div>
+          </div>
+          <a
+            href={whopOAuthUrl}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-surface-card px-3 py-2 text-sm font-medium text-text-primary hover:bg-gray-50 transition-colors"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <rect width="24" height="24" rx="6" fill="#FF6243"/>
+              <path d="M7 8h10v2H7V8zm0 3h10v2H7v-2zm0 3h7v2H7v-2z" fill="#fff"/>
+            </svg>
+            Sign in with Whop
+          </a>
+        </>
+      )}
       <p className="mt-6 text-center text-sm text-text-secondary">
         Don&apos;t have an account?{" "}
         <Link href="/auth/register" className="font-medium text-[var(--primary)] hover:underline">

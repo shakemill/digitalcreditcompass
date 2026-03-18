@@ -216,6 +216,7 @@ model User {
   name                      String
   passwordHash              String
   role                      UserRole  @default(FREE)
+  whopUserId                String?   @unique
   isActive                  Boolean   @default(true)
   emailVerified             Boolean   @default(false)
   emailVerificationToken    String?
@@ -253,6 +254,10 @@ model Subscription {
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   planId               String
   plan                 Plan     @relation(fields: [planId], references: [id])
+  provider             String   @default("stripe") // "stripe" | "whop"
+  providerSubscriptionId String?
+  whopMembershipId     String?
+  whopUserId           String?
   stripeSubscriptionId String?
   status               String   @default("active")  // active, canceled, past_due, etc.
   currentPeriodEnd     DateTime?
@@ -261,6 +266,16 @@ model Subscription {
 
   @@unique([userId])
   @@index([userId])
+}
+
+model PendingWhopSubscription {
+  id               String   @id @default(cuid())
+  whopMembershipId String   @unique
+  whopUserId       String
+  plan             String
+  status           String   @default("active")
+  periodEnd        DateTime?
+  createdAt        DateTime @default(now())
 }
 
 // ── SITE SETTINGS ───────────────────────────────────────────

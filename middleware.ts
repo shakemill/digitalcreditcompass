@@ -13,6 +13,7 @@ function isPublic(pathname: string): boolean {
   if (pathname === "/api/site-settings") return true;
   if (pathname === "/api/download-risk-methodology") return true;
   if (pathname.startsWith("/api/stripe/webhook")) return true;
+  if (pathname.startsWith("/api/webhooks/whop")) return true;
   if (pathname === "/api/v1") return true;
   if (pathname.startsWith("/auth")) return true;
   if (pathname === "/pricing" || pathname === "/contact" || pathname === "/terms" || pathname === "/privacy" || pathname === "/disclaimer" || pathname === "/acceptable-use" || pathname === "/cookies" || pathname === "/coming-soon") return true;
