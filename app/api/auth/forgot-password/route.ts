@@ -40,11 +40,16 @@ export async function POST(req: NextRequest) {
     });
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    await sendPasswordResetEmail(
-      user.email,
-      user.name,
-      `${baseUrl}/auth/reset-password?token=${token}`
-    );
+    try {
+      await sendPasswordResetEmail(
+        user.email,
+        user.name,
+        `${baseUrl}/auth/reset-password?token=${token}`
+      );
+    } catch (emailErr) {
+      console.error("[forgot-password] Reset email failed:", emailErr);
+      // User token is already set; do not fail the request (same generic message)
+    }
 
     return NextResponse.json({
       success: true,

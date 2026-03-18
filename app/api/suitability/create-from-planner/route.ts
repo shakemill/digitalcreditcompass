@@ -19,6 +19,22 @@ export async function POST(req: NextRequest) {
     const parsed = schema.parse(body);
     const session = await getSessionFromCookie();
 
+    if (session?.role === "FREE" && session.sub) {
+      const count = await db.suitabilitySnapshot.count({
+        where: { userId: session.sub },
+      });
+      if (count >= 1) {
+        return NextResponse.json(
+          {
+            error: "FREE_PLAN_REPORT_LIMIT",
+            message:
+              "Free plan allows only one saved report. Delete your existing report in Reports or upgrade to PRO to save more.",
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     const now = new Date();
     const id = uuidv4();
 

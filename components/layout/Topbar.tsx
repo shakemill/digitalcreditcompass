@@ -152,13 +152,11 @@ export function Topbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isAdminPage]);
 
-  async function handleAdminLogout() {
+  function handleAdminLogout() {
     setAdminDropdownOpen(false);
-    try {
-      await fetch("/api/admin/session", { method: "DELETE", credentials: "include" });
-    } finally {
-      window.location.href = "/admin/login";
-    }
+    // Redirect to logout route: server clears both admin + user cookies and redirects to /admin/login.
+    // Using a full-page navigation ensures cookies are cleared reliably in production (no fetch timing issues).
+    window.location.href = "/api/admin/logout";
   }
 
   async function handleUserLogout() {

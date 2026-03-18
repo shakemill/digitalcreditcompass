@@ -2,19 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { StablecoinProto } from "@/types/planner";
 import { useStablecoinPlanner } from "@/hooks/useStablecoinPlanner";
 import { ClientInfoModal } from "@/components/planner/ClientInfoModal";
 import { usePlannerContext } from "@/context/PlannerContext";
 import type { ClientInfo, StablecoinScenarioSnapshot } from "@/context/PlannerContext";
-import { generateAndDownloadStablecoinPdf } from "@/lib/pdf/generateStablecoinPdf";
-import { useSession, canExportPdf } from "@/hooks/useSession";
+import { useSession } from "@/hooks/useSession";
 import { StatCard } from "@/components/ui/StatCard";
 import { FormField } from "@/components/ui/FormField";
 import { ResultCell } from "@/components/ui/ResultCell";
 import { BreakdownBar } from "@/components/ui/BreakdownBar";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { WEIGHTS } from "@/lib/scoring/weights";
+import { AlertCircle, X } from "lucide-react";
 
 const STBL = "#0891B2";
 const DEFI_COLOR = "#0891B2";
@@ -324,9 +325,9 @@ export default function PlannerStablecoinPage() {
   } = useStablecoinPlanner();
   const { saveSnapshot, setClientInfo, clientInfo } = usePlannerContext();
   const { user } = useSession();
-  const allowPdf = canExportPdf(user?.role);
   const [showModal, setShowModal] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const handleSaveClick = () => {
     setShowModal(true);
@@ -389,15 +390,17 @@ export default function PlannerStablecoinPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data?.id) {
-        if (allowPdf) await generateAndDownloadStablecoinPdf(snapshot, info);
+        setSaveError(null);
         router.push(`/reports?id=${data.id}`);
       } else {
-        console.error("[Stablecoin planner] Save report failed:", res.status, data);
-        if (allowPdf) await generateAndDownloadStablecoinPdf(snapshot, info);
+        if (data?.error === "FREE_PLAN_REPORT_LIMIT") {
+          setSaveError(data?.message ?? "Free plan allows only one saved report. Delete your existing report or upgrade to PRO.");
+        } else {
+          console.error("[Stablecoin planner] Save report failed:", res.status, data);
+        }
       }
     } catch (e) {
       console.error("[Stablecoin planner] Save report error:", e);
-      if (allowPdf) await generateAndDownloadStablecoinPdf(snapshot, info);
     }
     setGenerating(false);
     setShowModal(false);
@@ -407,6 +410,40 @@ export default function PlannerStablecoinPage() {
 
   return (
     <div className="min-h-full w-full max-w-[1600px] space-y-5">
+      {saveError && (
+        <div
+          className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/90 p-4 font-sans text-sm text-amber-900"
+          role="alert"
+        >
+          <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" aria-hidden />
+          <div className="min-w-0 flex-1">
+            <p className="font-medium">Cannot save report</p>
+            <p className="mt-0.5 text-amber-800">{saveError}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Link
+                href="/reports"
+                className="inline-flex items-center rounded-lg border border-amber-300 bg-white px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wider text-amber-800 transition-colors hover:bg-amber-50"
+              >
+                View reports
+              </Link>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center rounded-lg border border-amber-400 bg-amber-500 px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wider text-white transition-colors hover:bg-amber-600"
+              >
+                Upgrade to PRO
+              </Link>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSaveError(null)}
+            className="rounded-lg p-1.5 text-amber-700 transition-colors hover:bg-amber-100"
+            aria-label="Dismiss"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
       {/* STAT CARDS */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

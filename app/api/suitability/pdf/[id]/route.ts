@@ -22,13 +22,13 @@ export async function GET(
 ) {
   try {
     const session = await getSessionFromCookie();
-    const role = session?.role;
-    if (role !== "PRO" && role !== "SUPER_ADMIN") {
+    if (!session) {
       return NextResponse.json(
-        { error: "PDF export is available for PRO members. Upgrade at /pricing." },
-        { status: 403 }
+        { error: "Sign in to download the report." },
+        { status: 401 }
       );
     }
+    // FREE, PRO and SUPER_ADMIN can download PDFs
     const { id } = await params;
     const snapshot = await db.suitabilitySnapshot.findUnique({
       where: { id },

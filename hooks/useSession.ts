@@ -27,5 +27,5 @@ export function useSession(): { user: SessionUser | null; loading: boolean } {
 }
 
 export function canExportPdf(role: string | undefined): boolean {
-  return role === "PRO" || role === "SUPER_ADMIN";
+  return role === "FREE" || role === "PRO" || role === "SUPER_ADMIN";
 }
