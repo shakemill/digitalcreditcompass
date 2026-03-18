@@ -9,7 +9,7 @@ export function LandingCTA() {
           Ready to Get <span className="text-[var(--primary)]">Started?</span>
         </h2>
         <p className="mt-4 text-text-secondary">
-          Start modeling digital income strategies and evaluating risk with Digital Credit Compass.
+          Start modeling digital income strategies and evaluating risk with DCC.
         </p>
         <p className="mt-2 text-text-secondary">
           Access the platform&apos;s planners, risk intelligence tools, and Yield Board to explore digital credit opportunities with greater clarity.

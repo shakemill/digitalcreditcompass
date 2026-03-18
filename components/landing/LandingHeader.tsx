@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { label: "Home", href: "/", sectionId: null },
   { label: "Features", href: "/#how-it-works", sectionId: "how-it-works" },
   { label: "Pricing", href: "/#pricing", sectionId: "pricing" },
-  { label: "Understanding DCC", href: "/#faq", sectionId: "faq" },
+  { label: "How DCC works", href: "/#faq", sectionId: "faq" },
   { label: "Contact", href: "/#contact", sectionId: "contact" },
 ];
 
@@ -102,7 +102,7 @@ export function LandingHeader() {
             className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-hover hover:text-text-secondary"
           >
             <Download className="h-4 w-4 shrink-0" aria-hidden />
-            Risk methodology
+            Methodology
           </Link>
         </nav>
         <div className="flex items-center gap-4">
@@ -175,7 +175,7 @@ export function LandingHeader() {
               className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-hover"
             >
               <Download className="h-4 w-4 shrink-0" aria-hidden />
-              Risk methodology
+              Methodology
             </Link>
             {user ? (
               <div className="flex flex-col gap-2 border-t border-border pt-3">

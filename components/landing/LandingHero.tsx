@@ -28,7 +28,7 @@ export function LandingHero() {
             className="inline-flex h-[46px] items-center gap-2 rounded-lg border-2 border-text-primary bg-white px-6 py-3 text-base font-medium text-text-primary transition-colors hover:bg-surface-hover"
           >
             <Play className="h-5 w-5 shrink-0" aria-hidden />
-            Watch videos
+            See DCC in Action
           </Link>
         </div>
       </div>

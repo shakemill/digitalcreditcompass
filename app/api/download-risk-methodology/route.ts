@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 import path from "path";
 
-const FILENAME = "DCC_Score_Methodology_v1.pdf";
+const FILENAME = "DCC_Score_Methodology_v1_Final_SECURED.pdf";
 
 export async function GET() {
   try {

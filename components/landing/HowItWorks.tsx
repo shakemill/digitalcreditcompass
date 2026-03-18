@@ -29,7 +29,7 @@ export function HowItWorks() {
       <div className="mx-auto max-w-6xl">
         <div className="text-center">
           <h2 className="font-heading text-[45px] font-bold leading-tight text-text-primary">
-            How Digital Credit Compass <span className="text-[var(--primary)]">Works</span>
+            How DCC <span className="text-[var(--primary)]">Works</span>
           </h2>
           <p className="mt-2 text-text-secondary">
             A structured framework for evaluating digital yield strategies.

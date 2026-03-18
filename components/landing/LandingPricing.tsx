@@ -30,7 +30,7 @@ export function LandingPricing() {
       <div className="mx-auto max-w-6xl">
         <div className="text-center">
           <h2 className="font-heading text-[45px] font-bold leading-tight text-text-primary">
-            Access Digital <span className="text-[var(--primary)]">Credit Compass</span>
+            Access <span className="text-[var(--primary)]">DCC</span>
           </h2>
           <p className="mt-2 text-text-secondary">
             Designed for investors who want greater transparency when evaluating digital yield strategies.

@@ -5,18 +5,18 @@ import { ChevronDown } from "lucide-react";
 
 const FAQ_ITEMS: { question: string; answer: string[] }[] = [
   {
-    question: "What is Digital Credit Compass?",
+    question: "What is DCC?",
     answer: [
-      "Digital Credit Compass (DCC) is an independent planning and analysis platform designed to help users model and compare Bitcoin-backed, fiat, and stablecoin income structures.",
+      "DCC is an independent planning and analysis platform designed to help users model and compare Bitcoin-backed, fiat, and stablecoin income structures.",
       "The platform provides standardized risk scoring, scenario modeling tools, and professional risk analysis reports to help users evaluate yield strategies with greater transparency.",
       "DCC does not hold assets or execute transactions.",
     ],
   },
   {
-    question: "Why Digital Credit Compass Exists",
+    question: "Why DCC Exists",
     answer: [
       "The 2022 crypto credit crisis exposed major weaknesses in the digital lending market, when several large platforms collapsed and billions in investor capital were affected. One key issue was the lack of standardized tools to evaluate counterparty risk, collateral structures, and liquidity conditions across lending providers.",
-      "Digital Credit Compass was created to address this gap.",
+      "DCC was created to address this gap.",
       "DCC provides an independent analytical framework that allows users to model income strategies across Bitcoin-backed lending, fiat yield instruments, and stablecoin structures using standardized risk scoring and scenario analysis.",
       "Rather than promoting yield opportunities, the platform prioritizes risk transparency. By presenting comparable data, stress-tested scenarios, and structured risk analysis reports, DCC helps users evaluate strategies with greater clarity before allocating capital.",
     ],
@@ -24,7 +24,7 @@ const FAQ_ITEMS: { question: string; answer: string[] }[] = [
   {
     question: "Is DCC providing investment advice?",
     answer: [
-      "No. Digital Credit Compass is a planning and analysis platform that provides risk intelligence and scenario modeling tools.",
+      "No. DCC is a planning and analysis platform that provides risk intelligence and scenario modeling tools.",
       "DCC does not provide investment advice, portfolio management, custody services, or transaction execution.",
       "Users should always consult qualified financial or legal advisors before making investment decisions.",
     ],
@@ -61,10 +61,17 @@ const FAQ_ITEMS: { question: string; answer: string[] }[] = [
   {
     question: "How does DCC generate its risk scores?",
     answer: [
-      "Digital Credit Compass evaluates providers using a structured scoring framework that assesses factors such as transparency, risk management practices, liquidity conditions, and jurisdictional or regulatory environment.",
+      "DCC evaluates providers using a structured scoring framework that assesses factors such as transparency, risk management practices, liquidity conditions, and jurisdictional or regulatory environment.",
       "The specific scoring criteria and weightings may vary depending on the planner or strategy being analyzed (for example, Bitcoin-backed lending, fiat yield structures, or stablecoin strategies).",
       "Each provider receives a composite score designed to support consistent comparison across platforms.",
-      "Detailed scoring criteria, assumptions, and methodology are fully documented in the Risk Methodology section available in the platform menu.",
+      "Detailed scoring criteria, assumptions, and methodology are fully documented in the Methodology section available in the platform menu.",
+    ],
+  },
+  {
+    question: "Ready to Get Started?",
+    answer: [
+      "Start modeling digital income strategies and evaluating risk with DCC.",
+      "Access the platform's planners, risk intelligence tools, and Yield Board to explore digital credit opportunities with greater clarity.",
     ],
   },
 ];
@@ -77,7 +84,7 @@ export function LandingFAQ() {
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
           <h2 className="font-heading text-[45px] font-bold leading-tight text-text-primary">
-            Understanding Digital <span className="text-[var(--primary)]">Credit Compass</span>
+            Understanding <span className="text-[var(--primary)]">DCC</span>
           </h2>
         </div>
         <div className="mt-10 space-y-2">

@@ -7,9 +7,11 @@ const COMPANY_LINKS = [
 ];
 
 const LEGAL_LINKS = [
-  { label: "Privacy Policy", href: "#" },
-  { label: "Terms of Service", href: "#" },
-  { label: "Disclaimer", href: "#" },
+  { label: "Terms & Conditions", href: "/terms" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Disclaimer", href: "/disclaimer" },
+  { label: "Acceptable Use Policy", href: "/acceptable-use" },
+  { label: "Cookie Policy", href: "/cookies" },
 ];
 
 export function LandingFooter() {

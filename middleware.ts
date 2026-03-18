@@ -15,7 +15,7 @@ function isPublic(pathname: string): boolean {
   if (pathname.startsWith("/api/stripe/webhook")) return true;
   if (pathname === "/api/v1") return true;
   if (pathname.startsWith("/auth")) return true;
-  if (pathname === "/pricing" || pathname === "/contact" || pathname === "/coming-soon") return true;
+  if (pathname === "/pricing" || pathname === "/contact" || pathname === "/terms" || pathname === "/privacy" || pathname === "/disclaimer" || pathname === "/acceptable-use" || pathname === "/cookies" || pathname === "/coming-soon") return true;
   // Static assets in public/ (e.g. logo) must be served without auth
   if (/\.(png|jpg|jpeg|gif|ico|svg|webp|woff2?)$/i.test(pathname) || pathname === "/logo-dcc.png") return true;
   return false;
