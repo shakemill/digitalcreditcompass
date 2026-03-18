@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, UserPlus } from "lucide-react";
+import { Eye, EyeOff, LogIn, UserPlus } from "lucide-react";
+import { WhopAuthButton } from "@/components/auth/WhopAuthButton";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -77,7 +78,18 @@ export default function RegisterPage() {
       <p className="mt-1 text-center text-sm text-text-secondary">
         Sign up for a free DCC account.
       </p>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <div className="mt-4">
+        <WhopAuthButton label="Create account with Whop" />
+      </div>
+      <div className="relative mt-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-surface-card px-2 text-text-muted">or</span>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
         <div>
           <label htmlFor="reg-name" className="mb-1 block text-xs font-medium text-text-secondary">
             Full name
@@ -170,12 +182,23 @@ export default function RegisterPage() {
           {loading ? "Creating account…" : "Create account"}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-text-secondary">
-        Already have an account?{" "}
-        <Link href="/auth/login" className="font-medium text-[var(--primary)] hover:underline">
+      <div className="mt-6 space-y-3">
+        <p className="text-center text-sm text-text-secondary">
+          Already have an account?
+        </p>
+        <Link
+          href="/auth/login"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-surface-card px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-gray-50"
+        >
+          <LogIn className="h-4 w-4" aria-hidden />
           Sign in
         </Link>
-      </p>
+        <p className="text-center">
+          <Link href="/" className="text-sm font-medium text-text-secondary hover:text-text-primary hover:underline">
+            ← Back to home
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
