@@ -163,14 +163,14 @@ async function main() {
 
   // ─── STABLECOIN Providers: DeFi (3) + CeFi (2) ─────────────────────
   const stblProviders = [
-    // DeFi (on-chain)
-    { name: "Morpho USDC", slug: "morpho-usdc", score: 79, apyMin: 0.07, apyMax: 0.09, providerCategory: "DEFI" as const, stablecoinTypes: ["USDC"], pegType: "Fiat-backed" },
-    { name: "Aave USDC", slug: "aave-usdc", score: 76, apyMin: 0.06, apyMax: 0.08, providerCategory: "DEFI" as const, stablecoinTypes: ["USDC", "USDT"], pegType: "Fiat / Crypto" },
-    { name: "Compound v3", slug: "compound-v3", score: 68, apyMin: 0.05, apyMax: 0.07, providerCategory: "DEFI" as const, stablecoinTypes: ["USDC"], pegType: "Fiat-backed" },
+    // DeFi (on-chain) — typically instant withdrawal
+    { name: "Morpho USDC", slug: "morpho-usdc", score: 79, apyMin: 0.07, apyMax: 0.09, providerCategory: "DEFI" as const, stablecoinTypes: ["USDC"], pegType: "Fiat-backed", withdrawalSpeed: "instant" as const },
+    { name: "Aave USDC", slug: "aave-usdc", score: 76, apyMin: 0.06, apyMax: 0.08, providerCategory: "DEFI" as const, stablecoinTypes: ["USDC", "USDT"], pegType: "Fiat / Crypto", withdrawalSpeed: "instant" as const },
+    { name: "Compound v3", slug: "compound-v3", score: 68, apyMin: 0.05, apyMax: 0.07, providerCategory: "DEFI" as const, stablecoinTypes: ["USDC"], pegType: "Fiat-backed", withdrawalSpeed: "instant" as const },
     // CeFi (custodial)
-    { name: "Ledn USDC", slug: "ledn-usdc", score: 72, apyMin: 0.05, apyMax: 0.07, providerCategory: "CEFI" as const, stablecoinTypes: ["USDC"], pegType: "Fiat-backed" },
-    { name: "Nexo USDC", slug: "nexo-usdc", score: 70, apyMin: 0.04, apyMax: 0.06, providerCategory: "CEFI" as const, stablecoinTypes: ["USDC", "USDT"], pegType: "Fiat / Crypto" },
-    { name: "Matrixport", slug: "matrixport-stablecoin", score: 72, apyMin: 0.04, apyMax: 0.08, providerCategory: "CEFI" as const, stablecoinTypes: ["USDC", "USDT"], pegType: "Fiat-backed" },
+    { name: "Ledn USDC", slug: "ledn-usdc", score: 72, apyMin: 0.05, apyMax: 0.07, providerCategory: "CEFI" as const, stablecoinTypes: ["USDC"], pegType: "Fiat-backed", withdrawalSpeed: "instant" as const },
+    { name: "Nexo USDC", slug: "nexo-usdc", score: 70, apyMin: 0.04, apyMax: 0.06, providerCategory: "CEFI" as const, stablecoinTypes: ["USDC", "USDT"], pegType: "Fiat / Crypto", withdrawalSpeed: "instant" as const },
+    { name: "Matrixport", slug: "matrixport-stablecoin", score: 72, apyMin: 0.04, apyMax: 0.08, providerCategory: "CEFI" as const, stablecoinTypes: ["USDC", "USDT"], pegType: "Fiat-backed", withdrawalSpeed: "<7d" as const },
   ];
 
   for (const s of stblProviders) {
@@ -189,6 +189,7 @@ async function main() {
         providerCategory: s.providerCategory,
         stablecoinTypes: s.stablecoinTypes,
         pegType: s.pegType,
+        withdrawalSpeed: s.withdrawalSpeed,
       },
       update: {
         apyMin: s.apyMin,
@@ -196,6 +197,7 @@ async function main() {
         providerCategory: s.providerCategory,
         stablecoinTypes: s.stablecoinTypes,
         pegType: s.pegType,
+        withdrawalSpeed: s.withdrawalSpeed,
       },
     });
 

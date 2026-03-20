@@ -53,6 +53,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const marketDataByProvider = Object.fromEntries(
+      (
+        await db.marketDataCache.findMany({
+          where: { providerId: { in: ids } },
+          select: { providerId: true, pegDeviation: true, maxDrawdown90d: true },
+        })
+      ).map((m) => [m.providerId, m])
+    );
+
     const inputIds = providers
       .map((p) => p.scoreSnapshots[0]?.scoringInputId)
       .filter((id): id is string => !!id);
@@ -110,8 +119,13 @@ export async function GET(req: NextRequest) {
         yieldTransparency: input?.yieldTransparency ?? null,
         counterpartyRisk: input?.counterpartyRisk ?? null,
         liquidity: input?.liquidity ?? null,
-        pegDeviation90d: input?.pegDeviation90d ?? null,
-        maxDrawdown90d: input?.maxDrawdown90d ?? null,
+        pegDeviation90d:
+          input?.pegDeviation90d ??
+          (plannerTypeUpper === "STABLECOIN" ? marketDataByProvider[p.id]?.pegDeviation ?? null : null),
+        maxDrawdown90d:
+          input?.maxDrawdown90d ??
+          (plannerTypeUpper === "STABLECOIN" ? marketDataByProvider[p.id]?.maxDrawdown90d ?? null : null),
+        withdrawalSpeed: p.withdrawalSpeed ?? null,
       };
     });
 

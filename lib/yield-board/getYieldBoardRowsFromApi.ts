@@ -37,6 +37,7 @@ type ApiProvider = {
   liquidity?: number | null;
   pegDeviation90d?: number | null;
   maxDrawdown90d?: number | null;
+  withdrawalSpeed?: string | null;
 };
 
 function rehypToBoolean(rehyp?: string): boolean {
@@ -111,6 +112,10 @@ function mapApiProviderToRow(p: ApiProvider, index: number, plannerType: Planner
     if (p.notes) row.notes = p.notes;
     if (p.pegDeviation90d != null) row.maxDepeg90d = Math.abs(p.pegDeviation90d);
     else if (p.maxDrawdown90d != null) row.maxDepeg90d = Math.abs(p.maxDrawdown90d);
+    const ws = p.withdrawalSpeed?.toLowerCase();
+    if (ws === "instant" || ws === "<7d" || ws === "<30d" || ws === "locked") {
+      row.withdrawalSpeed = ws as YieldBoardRow["withdrawalSpeed"];
+    }
   }
   return row;
 }

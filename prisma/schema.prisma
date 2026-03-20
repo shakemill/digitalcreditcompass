@@ -30,6 +30,7 @@ model Provider {
   providerCategory ProviderCategory?
   stablecoinTypes   Json?    // ["USDC"], ["USDT"], or ["USDC", "USDT"]
   pegType           String?
+  withdrawalSpeed   String?  // "instant" | "<7d" | "<30d" | "locked"
   notes             String?  @db.Text
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
