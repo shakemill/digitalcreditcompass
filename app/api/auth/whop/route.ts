@@ -3,6 +3,7 @@ import { db } from "@/lib/prisma";
 import { setSessionCookie, getSessionFromCookie } from "@/lib/auth/session";
 import { upsertSubscription } from "@/lib/subscriptions";
 import { getBaseUrlFromRequest } from "@/lib/utils";
+import { sendWelcomeEmail, sendProWelcomeEmail } from "@/lib/email/sendEmail";
 
 const WHOP_API = "https://api.whop.com/api/v5";
 
@@ -82,6 +83,7 @@ export async function GET(req: NextRequest) {
 
     // 4. Find or create DCC user
     const existingSession = await getSessionFromCookie();
+    let wasNewlyCreated = false;
 
     let dccUser: { id: string; email: string; name: string; role: string } | null = null;
 
@@ -142,10 +144,14 @@ export async function GET(req: NextRequest) {
         select: { id: true, email: true, name: true, role: true },
       });
       dccUser = created;
+      wasNewlyCreated = true;
     }
 
     // 5. Process active memberships → upsert subscriptions
     let upgraded = false;
+    let firstPeriodEnd: Date | null = null;
+    let firstInternalPlan: string | null = null;
+
     for (const membership of memberships) {
       const internalPlan = mapWhopPlanToInternal(membership.plan_id);
       if (!internalPlan) continue;
@@ -155,6 +161,11 @@ export async function GET(req: NextRequest) {
         typeof renewalEnd === "number" && renewalEnd > 0
           ? new Date(renewalEnd * 1000)
           : null;
+
+      if (!firstPeriodEnd && periodEnd) {
+        firstPeriodEnd = periodEnd;
+        firstInternalPlan = internalPlan;
+      }
 
       await upsertSubscription({
         userId: dccUser.id,
@@ -180,6 +191,10 @@ export async function GET(req: NextRequest) {
     });
     for (const pending of pendingSubs) {
       const internalPlan = mapWhopPlanToInternal(pending.plan) || pending.plan;
+      if (!firstPeriodEnd && pending.periodEnd) {
+        firstPeriodEnd = pending.periodEnd;
+        firstInternalPlan = internalPlan;
+      }
       await upsertSubscription({
         userId: dccUser.id,
         provider: "whop",
@@ -197,12 +212,60 @@ export async function GET(req: NextRequest) {
     }
 
     // 6. Upgrade user role if any active membership
-    if (upgraded) {
+    if (upgraded && firstPeriodEnd && firstInternalPlan) {
+      const periodStart = (() => {
+        const d = new Date(firstPeriodEnd.getTime());
+        if (firstInternalPlan === "pro_annual") d.setFullYear(d.getFullYear() - 1);
+        else d.setMonth(d.getMonth() - 1);
+        return d;
+      })();
+      await db.user.update({
+        where: { id: dccUser.id },
+        data: {
+          role: "PRO",
+          subscriptionPeriodStart: periodStart,
+          subscriptionPeriodEnd: firstPeriodEnd,
+          billingInterval: firstInternalPlan === "pro_annual" ? "year" : "month",
+        },
+      });
+      dccUser = { ...dccUser, role: "PRO" };
+    } else if (upgraded) {
       await db.user.update({
         where: { id: dccUser.id },
         data: { role: "PRO" },
       });
       dccUser = { ...dccUser, role: "PRO" };
+    }
+
+    // 6b. Send welcome email for newly created users (after memberships processed)
+    if (wasNewlyCreated) {
+      try {
+        if (upgraded && firstPeriodEnd && firstInternalPlan) {
+          const periodStartForEmail = (() => {
+            const d = new Date(firstPeriodEnd.getTime());
+            if (firstInternalPlan === "pro_annual") d.setFullYear(d.getFullYear() - 1);
+            else d.setMonth(d.getMonth() - 1);
+            return d;
+          })();
+          const result = await sendProWelcomeEmail(
+            dccUser.email,
+            dccUser.name,
+            periodStartForEmail,
+            firstPeriodEnd,
+            {
+              billingInterval: firstInternalPlan === "pro_annual" ? "year" : "month",
+            }
+          );
+          if (!result.ok) {
+            console.error("[Whop OAuth] Pro welcome email failed:", result.error);
+          }
+        } else {
+          const signInUrl = `${baseUrl}/dashboard`;
+          await sendWelcomeEmail(dccUser.email, dccUser.name, signInUrl);
+        }
+      } catch (emailErr) {
+        console.error("[Whop OAuth] Welcome email failed:", emailErr);
+      }
     }
 
     // 7. Set DCC session cookie and redirect

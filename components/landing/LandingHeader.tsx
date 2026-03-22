@@ -84,11 +84,11 @@ export function LandingHeader() {
           aria-label="Digital Credit Compass Home"
         >
           <img
-            src="/logo-dcc.png"
-            alt="DCC"
-            width={48}
-            height={48}
-            className="h-12 w-auto object-contain"
+            src="/logo-dcc-nav.png"
+            alt="Digital Credit Compass"
+            width={64}
+            height={64}
+            className="h-16 w-auto object-contain"
           />
         </Link>
         <nav className="hidden items-center gap-8 md:flex" aria-label="Main">

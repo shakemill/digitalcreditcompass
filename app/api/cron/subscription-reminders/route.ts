@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
-import { sendSubscriptionExpiryReminder } from "@/lib/email/sendEmail";
+import {
+  sendProMonthlyReminder7d,
+  sendProMonthlyReminder1d,
+  sendProAnnualReminder30d,
+  sendProAnnualReminder7d,
+} from "@/lib/email/sendEmail";
 
 /**
  * Cron job: send subscription expiry reminder emails.
  * - Monthly: 7 days before and 1 day before expiration.
- * - Annual: 30 days before and 1 day before expiration.
+ * - Annual: 30 days before and 7 days before expiration (per DCC-Email-Templates).
  * Call via Vercel Cron (GET). Protect with CRON_SECRET in production.
  */
 function startOfDayUTC(d: Date): Date {
@@ -40,6 +45,14 @@ export async function GET(req: NextRequest) {
   const errors: string[] = [];
 
   try {
+    const proPlan = await db.plan.findUnique({ where: { slug: "pro" } });
+    const planPriceMonth = proPlan ? `$${(proPlan.priceMonthCents / 100).toFixed(2)}` : "$45.00";
+    const planPriceYear = proPlan ? `$${(proPlan.priceYearCents / 100).toFixed(2)}` : "$360.00";
+    const annualSavings =
+      proPlan
+        ? `$${((12 * proPlan.priceMonthCents - proPlan.priceYearCents) / 100).toFixed(2)}`
+        : "$180.00";
+
     const proUsers = await db.user.findMany({
       where: {
         role: "PRO",
@@ -72,7 +85,9 @@ export async function GET(req: NextRequest) {
       if (u.billingInterval === "month") {
         if (in7Window && !alreadySent7d) {
           try {
-            await sendSubscriptionExpiryReminder(u.email, u.name ?? "Subscriber", periodEnd, 7);
+            await sendProMonthlyReminder7d(u.email, u.name ?? "Subscriber", periodEnd, planPriceMonth, {
+              annualSavings,
+            });
             await db.user.update({
               where: { id: u.id },
               data: { subscriptionReminder7dForEnd: periodEnd },
@@ -84,7 +99,7 @@ export async function GET(req: NextRequest) {
         }
         if (in1Window && !alreadySent1d) {
           try {
-            await sendSubscriptionExpiryReminder(u.email, u.name ?? "Subscriber", periodEnd, 1);
+            await sendProMonthlyReminder1d(u.email, u.name ?? "Subscriber", periodEnd, planPriceMonth);
             await db.user.update({
               where: { id: u.id },
               data: { subscriptionReminder1dForEnd: periodEnd },
@@ -99,7 +114,7 @@ export async function GET(req: NextRequest) {
       if (u.billingInterval === "year") {
         if (in30Window && !alreadySent30d) {
           try {
-            await sendSubscriptionExpiryReminder(u.email, u.name ?? "Subscriber", periodEnd, 30);
+            await sendProAnnualReminder30d(u.email, u.name ?? "Subscriber", periodEnd, planPriceYear);
             await db.user.update({
               where: { id: u.id },
               data: { subscriptionReminder30dForEnd: periodEnd },
@@ -109,16 +124,16 @@ export async function GET(req: NextRequest) {
             errors.push(`30d ${u.email}: ${String(e)}`);
           }
         }
-        if (in1Window && !alreadySent1d) {
+        if (in7Window && !alreadySent7d) {
           try {
-            await sendSubscriptionExpiryReminder(u.email, u.name ?? "Subscriber", periodEnd, 1);
+            await sendProAnnualReminder7d(u.email, u.name ?? "Subscriber", periodEnd, planPriceYear);
             await db.user.update({
               where: { id: u.id },
-              data: { subscriptionReminder1dForEnd: periodEnd },
+              data: { subscriptionReminder7dForEnd: periodEnd },
             });
-            sent1d++;
+            sent7d++;
           } catch (e) {
-            errors.push(`1d ${u.email}: ${String(e)}`);
+            errors.push(`7d annual ${u.email}: ${String(e)}`);
           }
         }
       }

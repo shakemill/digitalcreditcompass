@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/lib/prisma";
 import { upsertSubscription } from "@/lib/subscriptions";
+import { sendProWelcomeEmail } from "@/lib/email/sendEmail";
 
 function verifyWhopSignature(rawBody: string, signature: string | null): boolean {
   const secret = process.env.WHOP_WEBHOOK_SECRET;
@@ -111,6 +112,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
+      const periodStart = (() => {
+        if (!periodEnd) return new Date();
+        const d = new Date(periodEnd.getTime());
+        if (internalPlan === "pro_annual") d.setFullYear(d.getFullYear() - 1);
+        else d.setMonth(d.getMonth() - 1);
+        return d;
+      })();
+
       await upsertSubscription({
         userId: dccUser.id,
         provider: "whop",
@@ -126,11 +135,40 @@ export async function POST(req: NextRequest) {
         where: { id: dccUser.id },
         data: {
           role: "PRO",
+          subscriptionPeriodStart: periodStart,
           subscriptionPeriodEnd: periodEnd,
           billingInterval: internalPlan === "pro_annual" ? "year" : "month",
         },
       });
       console.log("[Whop webhook] User set to PRO:", dccUser.id);
+
+      try {
+        const user = await db.user.findUnique({
+          where: { id: dccUser.id },
+          select: { email: true, name: true },
+        });
+        if (user) {
+          const endForEmail = periodEnd ?? periodStart;
+          const result = await sendProWelcomeEmail(
+            user.email,
+            user.name,
+            periodStart,
+            endForEmail,
+            {
+              billingInterval: internalPlan === "pro_annual" ? "year" : "month",
+            }
+          );
+          if (result.ok) {
+            console.info("[Whop webhook] PRO welcome email sent to", user.email);
+          } else if (result.reason === "smtp_not_configured") {
+            console.warn("[Whop webhook] PRO welcome email skipped: SMTP not configured");
+          } else {
+            console.error("[Whop webhook] PRO welcome email failed:", result.error);
+          }
+        }
+      } catch (emailErr) {
+        console.error("[Whop webhook] PRO welcome email error:", emailErr);
+      }
     }
 
     if (action === "membership.went_invalid" && membershipId) {
@@ -152,6 +190,7 @@ export async function POST(req: NextRequest) {
           where: { id: affected.userId },
           data: {
             role: "FREE",
+            subscriptionPeriodStart: null,
             subscriptionPeriodEnd: null,
             billingInterval: null,
             subscriptionReminder7dForEnd: null,
