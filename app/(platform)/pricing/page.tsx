@@ -132,6 +132,10 @@ export default function PricingPage() {
   const whopCheckoutMonthly = process.env.NEXT_PUBLIC_WHOP_CHECKOUT_MONTHLY?.trim();
   const whopUrlForInterval = billingInterval === "year" ? whopCheckoutAnnual : (whopCheckoutMonthly || whopCheckoutAnnual);
   const hasWhopUrl = !!(whopUrlForInterval && whopUrlForInterval !== "#");
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
+  const whopUrlWithRedirect = hasWhopUrl
+    ? whopUrlForInterval + (whopUrlForInterval!.includes("?") ? "&" : "?") + "onSuccess=" + encodeURIComponent(`${baseUrl}/api/auth/whop-sync`)
+    : "";
   const isFree = user?.role === "FREE";
   const isProOrAdmin = user?.role === "PRO" || user?.role === "SUPER_ADMIN";
 
@@ -233,13 +237,21 @@ export default function PricingPage() {
             )}
             {hasWhopUrl && (
               <a
-                href={whopUrlForInterval}
+                href={whopUrlWithRedirect}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full rounded-lg border border-border py-3 text-center text-sm font-medium text-text-primary hover:bg-surface-hover"
               >
                 {billingInterval === "year" ? "Subscribe annually — Whop" : "Subscribe monthly — Whop"}
               </a>
+            )}
+            {hasWhopUrl && (
+              <Link
+                href="/api/auth/whop-sync"
+                className="block py-2 text-center text-sm text-text-muted underline hover:text-text-primary"
+              >
+                Vous avez payé via Whop ? Connectez-vous avec Whop pour activer le PRO
+              </Link>
             )}
             {!canCheckout && !hasWhopUrl && (
               <p className="text-sm text-text-muted">Payment options are not configured. Contact support.</p>
@@ -409,13 +421,21 @@ export default function PricingPage() {
             )}
             {hasWhopUrl && (
               <a
-                href={whopUrlForInterval}
+                href={whopUrlWithRedirect}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full rounded-lg border border-border py-3 text-center text-sm font-medium text-text-primary hover:bg-surface-hover"
               >
                 {billingInterval === "year" ? "Unlock PRO — annual (Whop)" : "Unlock PRO — monthly (Whop)"}
               </a>
+            )}
+            {hasWhopUrl && (
+              <Link
+                href="/api/auth/whop-sync"
+                className="block py-2 text-center text-sm text-text-muted underline hover:text-text-primary"
+              >
+                Vous avez payé via Whop ? Connectez-vous avec Whop pour activer le PRO
+              </Link>
             )}
           </div>
         </div>
