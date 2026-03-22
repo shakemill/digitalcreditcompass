@@ -53,6 +53,9 @@ NEXT_PUBLIC_WHOP_REDIRECT_URI=https://yourdomain.com/api/auth/whop
 # Checkout links (direct Whop purchase pages)
 NEXT_PUBLIC_WHOP_CHECKOUT_ANNUAL=https://whop.com/checkout/plan_…
 NEXT_PUBLIC_WHOP_CHECKOUT_MONTHLY=https://whop.com/checkout/plan_…
+
+# App URL (required for Whop post-payment redirect; used for onSuccess baseUrl)
+NEXT_PUBLIC_APP_URL=https://digitalcreditcompass.com
 ```
 
 ### Webhook Registration
@@ -81,6 +84,20 @@ The OAuth flow (`app/api/auth/whop/route.ts`):
 4. DCC exchanges the code for an access token, fetches user profile and active memberships
 5. Links the Whop user to an existing DCC account (by email match or existing session) or creates a new one
 6. Claims any `PendingWhopSubscription` records and activates PRO access
+
+### Checkout Redirect (post-payment)
+
+After payment, users must be redirected to DCC so their PRO plan is activated. Configure the redirect in Whop:
+
+**Whop Dashboard (recommended, applies to all payments):**
+1. Go to **Whop Dashboard → Settings → Checkout**
+2. Toggle on **Redirect link**
+3. Enter: `https://digitalcreditcompass.com/api/auth/whop-sync` (or `http://localhost:3000/api/auth/whop-sync` for local dev)
+4. Save
+
+**Alternative:** The pricing page (`/pricing`) adds `onSuccess` to the checkout URL when users click from DCC. This only works when the user starts from `/pricing`; dashboard redirect applies to all entry points (product page, shared links, etc.).
+
+Ensure `NEXT_PUBLIC_APP_URL` matches your domain in production so the `onSuccess` fallback works.
 
 ### Stripe & Whop Cohabitation
 
